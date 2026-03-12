@@ -1,518 +1,1289 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Gian hàng game · quay số & ném</title>
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #0d0f1c;
-            background: radial-gradient(circle at 50% 0%, #1a1f35, #0a0c18);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 12px;
-            color: #fff;
-        }
-        .app {
-            max-width: 460px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎯 Gian Hàng Trò Chơi</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-yellow: #FFE600;
+    --neon-pink: #FF2D78;
+    --neon-cyan: #00F5FF;
+    --neon-orange: #FF6B00;
+    --deep-bg: #0A0015;
+    --card-bg: rgba(255,255,255,0.05);
+    --glow-pink: 0 0 20px #FF2D78, 0 0 60px rgba(255,45,120,0.4);
+    --glow-cyan: 0 0 20px #00F5FF, 0 0 60px rgba(0,245,255,0.4);
+    --glow-yellow: 0 0 20px #FFE600, 0 0 60px rgba(255,230,0,0.4);
+  }
 
-        /* KHỐI VÒNG QUAY */
-        .wheel-block {
-            background: rgba(20, 30, 45, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 40px;
-            padding: 20px 16px 25px;
-            box-shadow: 0 20px 40px #00000080, 0 0 25px #00ffff40;
-        }
-        .wheel-title {
-            font-size: 1.9rem;
-            font-weight: 800;
-            text-align: center;
-            background: linear-gradient(135deg, #a0f0ff, #ffb8ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-        .wheel-container {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 0 auto 20px;
-        }
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            border-radius: 50%;
-            background: #1f2a3f;
-            box-shadow: 0 0 0 4px #00ffff99, 0 15px 30px black;
-            transition: box-shadow 0.2s;
-        }
-        .pointer {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 35px solid #f9d77e;
-            filter: drop-shadow(0 8px 6px #000000cc);
-            z-index: 5;
-        }
-        .spin-btn {
-            background: linear-gradient(145deg, #00bbff, #0066a0);
-            border: none;
-            color: white;
-            font-weight: 800;
-            font-size: 2rem;
-            padding: 16px 0;
-            width: 80%;
-            display: block;
-            margin: 5px auto 0;
-            border-radius: 60px;
-            box-shadow: 0 9px 0 #003f66, 0 10px 25px #00aaff;
-            cursor: pointer;
-            transition: 0.1s linear;
-            text-transform: uppercase;
-            border: 1px solid #aff0ff;
-        }
-        .spin-btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 4px 0 #003f66, 0 10px 20px cyan;
-        }
-        .spin-btn:disabled {
-            opacity: 0.5;
-            transform: translateY(5px);
-            box-shadow: 0 4px 0 #003f66;
-            pointer-events: none;
-        }
-        .result-msg {
-            background: #1a2637;
-            padding: 15px 10px;
-            border-radius: 50px;
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 15px;
-            border: 1px solid gold;
-            box-shadow: inset 0 2px 8px black;
-            min-height: 68px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* BA GAME */
-        .games-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .game-item {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 215, 0, 0.5);
-            border-radius: 34px;
-            padding: 16px 22px;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            box-shadow: 0 10px 30px #ffd70030;
-            transition: 0.25s;
-        }
-        .game-icon {
-            min-width: 80px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #15202b;
-            border: 2px solid #ffcc66;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            font-size: 2.2rem; /* giảm để hai icon vừa khung */
-            color: white;
-            filter: drop-shadow(0 0 10px cyan);
-            padding: 5px;
-        }
-        .game-icon i {
-            filter: drop-shadow(0 0 4px gold);
-        }
-        .game-info h3 {
-            font-size: 1.7rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #ffdb8a, #ffaa66);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-        .game-info p {
-            font-size: 1rem;
-            color: #bcd0f0;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .game-info i {
-            color: #0ff;
-        }
+  html { scroll-behavior: smooth; }
 
-        /* nút nhạc */
-        .music-ctrl {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1e2a47;
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.4rem;
-            color: white;
-            border: 2px solid cyan;
-            box-shadow: 0 0 30px cyan;
-            cursor: pointer;
-            z-index: 999;
-            transition: 0.2s;
-        }
-        .music-ctrl.muted {
-            border-color: #888;
-            box-shadow: none;
-            opacity: 0.7;
-        }
-        footer {
-            text-align: center;
-            color: #9aaec9;
-            font-size: 1rem;
-            margin: 10px 0 20px;
-        }
-    </style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--deep-bg);
+    color: #fff;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ===== FLOATING PARTICLES ===== */
+  #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+    opacity: 0;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) scale(1.2) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: relative;
+    text-align: center;
+    padding: 40px 20px 20px;
+    z-index: 10;
+    overflow: hidden;
+  }
+  .header-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,230,0,0.15) 0%, transparent 70%);
+  }
+  .header-lights {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0%, transparent 48%, rgba(255,230,0,0.03) 50%, transparent 52%);
+  }
+
+  .logo-wrap { position: relative; display: inline-block; }
+  .logo-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(2.8rem, 10vw, 6rem);
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, #FFE600 0%, #FF6B00 40%, #FF2D78 70%, #00F5FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255,230,0,0.5));
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+  @keyframes titlePulse {
+    0%,100% { filter: drop-shadow(0 0 20px rgba(255,230,0,0.5)); }
+    50% { filter: drop-shadow(0 0 50px rgba(255,107,0,0.8)) drop-shadow(0 0 80px rgba(255,45,120,0.4)); }
+  }
+  .logo-sub {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.9rem, 3vw, 1.3rem);
+    color: var(--neon-cyan);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    animation: subtitleGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes subtitleGlow {
+    from { text-shadow: 0 0 10px var(--neon-cyan); }
+    to { text-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0,245,255,0.5); }
+  }
+
+  .header-stars {
+    display: flex; justify-content: center; gap: 10px; margin-top: 10px;
+  }
+  .star {
+    font-size: 1.5rem;
+    animation: starSpin 3s linear infinite;
+    display: inline-block;
+  }
+  .star:nth-child(2) { animation-delay: 0.5s; animation-duration: 2s; }
+  .star:nth-child(3) { animation-delay: 1s; animation-duration: 4s; }
+  @keyframes starSpin {
+    0% { transform: rotate(0) scale(1); }
+    50% { transform: rotate(180deg) scale(1.3); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  /* ===== SECTION TITLES ===== */
+  .section-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    text-align: center;
+    letter-spacing: 3px;
+    position: relative;
+    margin-bottom: 30px;
+  }
+  .section-title span {
+    background: linear-gradient(90deg, var(--neon-yellow), var(--neon-pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 80px; height: 4px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan));
+    margin: 8px auto 0;
+    border-radius: 2px;
+    box-shadow: 0 0 15px var(--neon-pink);
+  }
+
+  /* ===== LUCKY WHEEL SECTION ===== */
+  #lucky-section {
+    position: relative;
+    padding: 30px 15px 50px;
+    z-index: 10;
+  }
+  #lucky-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(255,45,120,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wheel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+  }
+
+  .wheel-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .wheel-outer {
+    width: min(340px, 90vw);
+    height: min(340px, 90vw);
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a0030, #000820);
+    box-shadow:
+      0 0 0 8px rgba(255,230,0,0.3),
+      0 0 0 12px rgba(255,107,0,0.2),
+      0 0 60px rgba(255,45,120,0.4),
+      inset 0 0 40px rgba(0,0,0,0.5);
+    position: relative;
+    animation: wheelIdle 6s ease-in-out infinite;
+  }
+  @keyframes wheelIdle {
+    0%,100% { box-shadow: 0 0 0 8px rgba(255,230,0,0.3), 0 0 0 12px rgba(255,107,0,0.2), 0 0 60px rgba(255,45,120,0.4), inset 0 0 40px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(255,230,0,0.6), 0 0 0 14px rgba(255,107,0,0.4), 0 0 100px rgba(255,45,120,0.6), inset 0 0 40px rgba(0,0,0,0.5); }
+  }
+
+  #wheelCanvas {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50%;
+  }
+
+  .wheel-pointer {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 40px solid var(--neon-yellow);
+    filter: drop-shadow(0 0 10px var(--neon-yellow));
+    z-index: 20;
+    animation: pointerBounce 1s ease-in-out infinite;
+  }
+  @keyframes pointerBounce {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-4px); }
+  }
+
+  .wheel-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px; height: 50px;
+    background: radial-gradient(circle, #fff 0%, var(--neon-yellow) 50%, var(--neon-orange) 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--neon-yellow), 0 0 40px rgba(255,230,0,0.5);
+    z-index: 20;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    transition: transform 0.2s;
+  }
+  .wheel-center:hover { transform: translate(-50%, -50%) scale(1.1); }
+
+  .spin-btn {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    letter-spacing: 3px;
+    padding: 16px 50px;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange));
+    border: none;
+    border-radius: 50px;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(255,45,120,0.5), 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .spin-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .spin-btn:hover::before { transform: translateX(100%); }
+  .spin-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(255,45,120,0.8), 0 8px 30px rgba(0,0,0,0.5); }
+  .spin-btn:active { transform: scale(0.97); }
+  .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .wheel-result {
+    min-height: 60px;
+    text-align: center;
+  }
+  .result-badge {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    animation: resultPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes resultPop {
+    from { transform: scale(0) rotate(-10deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  /* ===== PRIZES TABLE ===== */
+  .prizes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .prize-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .prize-card:hover { transform: translateY(-3px); }
+  .prize-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .prize-label { font-family: 'Fredoka One', cursive; font-size: 0.95rem; margin-bottom: 4px; }
+  .prize-prob { font-size: 0.75rem; opacity: 0.6; }
+
+  /* ===== GAMES SECTION ===== */
+  #games-section {
+    position: relative;
+    padding: 20px 15px 60px;
+    z-index: 10;
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .game-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s;
+    cursor: pointer;
+  }
+  .game-card:hover {
+    transform: translateY(-12px) scale(1.02);
+  }
+  .game-card:nth-child(1):hover { box-shadow: 0 20px 60px rgba(255,45,120,0.4); }
+  .game-card:nth-child(2):hover { box-shadow: 0 20px 60px rgba(0,245,255,0.4); }
+  .game-card:nth-child(3):hover { box-shadow: 0 20px 60px rgba(255,230,0,0.4); }
+
+  .game-canvas-wrap {
+    position: relative;
+    width: 100%;
+    padding-top: 65%;
+    overflow: hidden;
+    background: #050010;
+  }
+  .game-canvas-wrap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .game-card-shine {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .game-card:hover .game-card-shine { left: 150%; }
+
+  .game-info {
+    padding: 20px;
+    position: relative;
+  }
+  .game-number {
+    font-family: 'Bangers', cursive;
+    font-size: 3.5rem;
+    position: absolute;
+    right: 16px; top: -20px;
+    opacity: 0.12;
+    line-height: 1;
+  }
+  .game-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .game-name {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .game-desc {
+    font-size: 0.88rem;
+    opacity: 0.7;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .game-play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .game-play-btn:hover { transform: scale(1.05); }
+
+  /* Game-specific colors */
+  .game-card:nth-child(1) .game-tag { background: rgba(255,45,120,0.2); color: var(--neon-pink); border: 1px solid rgba(255,45,120,0.3); }
+  .game-card:nth-child(1) .game-name { color: var(--neon-pink); text-shadow: 0 0 20px rgba(255,45,120,0.5); }
+  .game-card:nth-child(1) .game-play-btn { background: linear-gradient(135deg, var(--neon-pink), #c0002b); color: #fff; box-shadow: 0 0 20px rgba(255,45,120,0.4); }
+
+  .game-card:nth-child(2) .game-tag { background: rgba(0,245,255,0.2); color: var(--neon-cyan); border: 1px solid rgba(0,245,255,0.3); }
+  .game-card:nth-child(2) .game-name { color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0,245,255,0.5); }
+  .game-card:nth-child(2) .game-play-btn { background: linear-gradient(135deg, var(--neon-cyan), #0095a8); color: #000; box-shadow: 0 0 20px rgba(0,245,255,0.4); }
+
+  .game-card:nth-child(3) .game-tag { background: rgba(255,230,0,0.2); color: var(--neon-yellow); border: 1px solid rgba(255,230,0,0.3); }
+  .game-card:nth-child(3) .game-name { color: var(--neon-yellow); text-shadow: 0 0 20px rgba(255,230,0,0.5); }
+  .game-card:nth-child(3) .game-play-btn { background: linear-gradient(135deg, var(--neon-yellow), #c08000); color: #000; box-shadow: 0 0 20px rgba(255,230,0,0.4); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    position: relative;
+    z-index: 10;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  footer p { opacity: 0.4; font-size: 0.85rem; }
+
+  /* ===== MUSIC BUTTON ===== */
+  #musicBtn {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange));
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 0 20px rgba(255,45,120,0.6);
+    transition: transform 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #musicBtn:hover { transform: scale(1.1); }
+  #musicBtn.playing { animation: musicPulse 1s ease-in-out infinite; }
+  @keyframes musicPulse {
+    0%,100% { box-shadow: 0 0 20px rgba(255,45,120,0.6); }
+    50% { box-shadow: 0 0 40px rgba(255,45,120,0.9), 0 0 60px rgba(255,107,0,0.4); }
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    pointer-events: none;
+    z-index: 999;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== DIVIDER ===== */
+  .neon-divider {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-pink), var(--neon-cyan), var(--neon-yellow), transparent);
+    margin: 10px 0 30px;
+    box-shadow: 0 0 15px rgba(255,45,120,0.3);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 480px) {
+    .prizes-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .prize-card { padding: 10px; }
+    .prize-icon { font-size: 1.6rem; }
+    .game-info { padding: 14px; }
+  }
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal:nth-child(2) { transition-delay: 0.1s; }
+  .reveal:nth-child(3) { transition-delay: 0.2s; }
+</style>
 </head>
 <body>
-    <div class="app">
-        <!-- VÒNG QUAY -->
-        <div class="wheel-block">
-            <div class="wheel-title">🎰 LADY LUCKY</div>
-            <div class="wheel-container">
-                <canvas id="wheelCanvas" width="400" height="400"></canvas>
-                <div class="pointer"></div>
-            </div>
-            <button class="spin-btn" id="spinBtn">⚡QUAY⚡</button>
-            <div class="result-msg" id="wheelResult">🔥 Chờ bạn quay 🔥</div>
-        </div>
 
-        <!-- 3 GAME với tên và icon đã chỉnh sửa -->
-        <div class="games-list">
-            <!-- BONG BÓNG (ném phi tiêu vào bong bóng) -->
-            <div class="game-item">
-                <div class="game-icon">
-                    <i class="fa-regular fa-circle"></i>
-                    <i class="fa-solid fa-dharmachakra"></i>
-                </div>
-                <div class="game-info">
-                    <h3>BONG BÓNG</h3>
-                    <p><i class="fa-solid fa-bullseye"></i> Ném phi tiêu vỡ bong bóng</p>
-                </div>
-            </div>
-            <!-- PHI TIÊU (ném phi tiêu vào bia) -->
-            <div class="game-item">
-                <div class="game-icon">
-                    <i class="fa-solid fa-crosshairs"></i>
-                </div>
-                <div class="game-info">
-                    <h3>PHI TIÊU</h3>
-                    <p><i class="fa-solid fa-dart"></i> Phi tiêu hồng tâm tính điểm</p>
-                </div>
-            </div>
-            <!-- NÉM LON -->
-            <div class="game-item">
-                <div class="game-icon">
-                    <i class="fa-solid fa-beer-can"></i>
-                    <i class="fa-solid fa-bolt"></i>
-                </div>
-                <div class="game-info">
-                    <h3>NÉM LON</h3>
-                    <p><i class="fa-solid fa-cubes"></i> Bóng trúng lon, đổ hết</p>
-                </div>
-            </div>
-        </div>
+<!-- Particles -->
+<div id="particles"></div>
 
-        <footer>
-            📱 quét QR vào hội game thủ 📱
-        </footer>
+<!-- Music Button -->
+<button id="musicBtn" title="Bật/Tắt nhạc">🎵</button>
 
-        <!-- Nút nhạc -->
-        <div class="music-ctrl muted" id="musicToggle">
-            <i class="fa-solid fa-music" id="musicIcon"></i>
-        </div>
+<!-- HEADER -->
+<header>
+  <div class="header-bg"></div>
+  <div class="header-lights"></div>
+  <div class="logo-wrap">
+    <div class="logo-title">🎯 GIAN HÀNG TRÒ CHƠI 🎯</div>
+    <div class="logo-sub">✨ Vui chơi · Thử thách · Giải thưởng ✨</div>
+    <div class="header-stars">
+      <span class="star">⭐</span>
+      <span class="star">🌟</span>
+      <span class="star">⭐</span>
+    </div>
+  </div>
+</header>
+
+<!-- LUCKY WHEEL SECTION -->
+<section id="lucky-section">
+  <div class="neon-divider"></div>
+  <h2 class="section-title reveal"><span>🎰 VÒNG QUAY MAY MẮN 🎰</span></h2>
+
+  <div class="wheel-container">
+    <div class="wheel-wrap reveal">
+      <div class="wheel-outer">
+        <canvas id="wheelCanvas" width="340" height="340"></canvas>
+        <div class="wheel-pointer"></div>
+        <div class="wheel-center" onclick="spinWheel()">🎯</div>
+      </div>
     </div>
 
-    <!-- file nhạc nền (cần upload cùng thư mục) -->
-    <audio id="bgMusic" loop preload="auto">
-        <source src="background-music.mp3" type="audio/mpeg">
-    </audio>
+    <div class="wheel-result reveal" id="wheelResult"></div>
 
-    <script>
-        (function() {
-            // ------------------------------------------------------------
-            // VÒNG QUAY VỚI CÁC Ô ĐƯỢC XẾP LỘN XỘN (SHUFFLE)
-            // Tỷ lệ giữ nguyên: 2 ô "Thêm 1 lượt" (20%), 1 ô "Thêm 2 lượt" (5%),
-            // 1 ô "Mất 1 lượt" (20%), 3 ô "Không có gì" (50%)
-            // ------------------------------------------------------------
-            let segments = [
-                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#2ecc71' },
-                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#27ae60' },
-                { label: 'THÊM 2 LƯỢT', percent: 5, color: '#f39c12' },
-                { label: 'MẤT 1 LƯỢT', percent: 20, color: '#e67e22' },
-                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#7f8c8d' },
-                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#95a5a6' },
-                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#bdc3c7' }
-            ];
+    <button class="spin-btn reveal" id="spinBtn" onclick="spinWheel()">
+      🎲 QUAY NGAY!
+    </button>
 
-            // Xáo trộn thứ tự các ô (lộn xộn)
-            function shuffleArray(arr) {
-                for (let i = arr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                }
-                return arr;
-            }
-            segments = shuffleArray(segments);
 
-            // tính toán góc cho mỗi segment dựa trên thứ tự đã xáo
-            const angles = [];
-            let start = 0;
-            segments.forEach(seg => {
-                const angle = (seg.percent / 100) * Math.PI * 2;
-                angles.push({
-                    start: start,
-                    end: start + angle,
-                    label: seg.label,
-                    color: seg.color
-                });
-                start += angle;
-            });
+  </div>
+</section>
 
-            const canvas = document.getElementById('wheelCanvas');
-            const ctx = canvas.getContext('2d');
-            const spinBtn = document.getElementById('spinBtn');
-            const resultDiv = document.getElementById('wheelResult');
+<!-- GAMES SECTION -->
+<section id="games-section">
+  <div class="neon-divider"></div>
+  <h2 class="section-title reveal"><span>🕹️ CÁC TRÒ CHƠI 🕹️</span></h2>
 
-            let rotation = 0; // radian hiện tại
-            let spinning = false;
-            let animFrame = null;
+  <div class="games-grid">
+    <!-- Game 1: Ném Bong Bóng -->
+    <div class="game-card reveal">
+      <div class="game-card-shine"></div>
+      <div class="game-canvas-wrap">
+        <canvas id="game1Canvas"></canvas>
+      </div>
+      <div class="game-info">
+        <div class="game-number">01</div>
+        <div class="game-tag">💥 HOT</div>
+        <div class="game-name">NÉM BONG BÓNG</div>
+        <p class="game-desc">Ném phi tiêu vào những quả bóng bay đầy màu sắc. Càng vỡ nhiều, điểm càng cao! Thử thách sự chính xác của bạn!</p>
+        <button class="game-play-btn" onclick="showQR('Ném Bong Bóng')">🎟️ Mua Vé Ngay →</button>
+      </div>
+    </div>
 
-            function drawWheel(rotateRad) {
-                ctx.clearRect(0, 0, 400, 400);
-                const cx = 200, cy = 200;
-                const radius = 180;
+    <!-- Game 2: Ném Phi Tiêu -->
+    <div class="game-card reveal">
+      <div class="game-card-shine"></div>
+      <div class="game-canvas-wrap">
+        <canvas id="game2Canvas"></canvas>
+      </div>
+      <div class="game-info">
+        <div class="game-number">02</div>
+        <div class="game-tag">🎯 CLASSIC</div>
+        <div class="game-name">NÉM PHI TIÊU</div>
+        <p class="game-desc">Ném phi tiêu vào bia tròn, nhắm thẳng vào tâm để đạt điểm số cao nhất. Kỹ năng và sự tập trung là chìa khóa!</p>
+        <button class="game-play-btn" onclick="showQR('Ném Phi Tiêu')">🎟️ Mua Vé Ngay →</button>
+      </div>
+    </div>
 
-                for (let i = 0; i < angles.length; i++) {
-                    const seg = angles[i];
-                    const startAng = seg.start + rotateRad;
-                    const endAng = seg.end + rotateRad;
+    <!-- Game 3: Ném Lon -->
+    <div class="game-card reveal">
+      <div class="game-card-shine"></div>
+      <div class="game-canvas-wrap">
+        <canvas id="game3Canvas"></canvas>
+      </div>
+      <div class="game-info">
+        <div class="game-number">03</div>
+        <div class="game-tag">🏆 CHALLENGE</div>
+        <div class="game-name">NÉM LON</div>
+        <p class="game-desc">Dùng bóng ném đổ hết các lon xếp chồng. Chỉ 3 quả bóng — bạn có thể hạ gục tất cả không? Thách thức bắt đầu!</p>
+        <button class="game-play-btn" onclick="showQR('Ném Lon')">🎟️ Mua Vé Ngay →</button>
+      </div>
+    </div>
+  </div>
+</section>
 
-                    // vẽ múi
-                    ctx.beginPath();
-                    ctx.moveTo(cx, cy);
-                    ctx.arc(cx, cy, radius, startAng, endAng);
-                    ctx.closePath();
-                    ctx.fillStyle = seg.color;
-                    ctx.fill();
-                    ctx.strokeStyle = '#222';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+<!-- QR MODAL -->
+<div id="qrModal" style="
+  display:none; position:fixed; inset:0; z-index:999;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; padding:20px;
+">
+  <div id="qrBox" style="
+    background:linear-gradient(145deg,#0f0025,#00101e);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:28px;
+    padding:30px 24px;
+    max-width:360px; width:100%;
+    text-align:center;
+    box-shadow:0 0 60px rgba(255,45,120,0.3), 0 0 120px rgba(0,245,255,0.15);
+    animation: modalPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+    position:relative;
+  ">
+    <button onclick="closeQR()" style="
+      position:absolute; top:14px; right:16px;
+      background:rgba(255,255,255,0.08); border:none; color:#fff;
+      width:34px; height:34px; border-radius:50%; font-size:1.1rem;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background 0.2s;
+    " onmouseover="this.style.background='rgba(255,45,120,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">✕</button>
 
-                    // vẽ nhãn
-                    const mid = (startAng + endAng) / 2;
-                    const textX = cx + Math.cos(mid) * 100;
-                    const textY = cy + Math.sin(mid) * 100;
+    <div style="font-size:2.2rem; margin-bottom:6px;">🎟️</div>
+    <div style="font-family:'Bangers',cursive; font-size:1.6rem; letter-spacing:2px; color:#FFE600; margin-bottom:4px;">MUA VÉ THAM GIA</div>
+    <div id="qrGameName" style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:#00F5FF; margin-bottom:18px;"></div>
 
-                    let short = '';
-                    if (seg.label.includes('THÊM 1')) short = '+1';
-                    else if (seg.label.includes('THÊM 2')) short = '+2';
-                    else if (seg.label.includes('MẤT')) short = '-1';
-                    else short = '0';
+    <!-- QR Placeholder -->
+    <div style="
+      background:#fff; border-radius:16px; padding:14px;
+      display:inline-block; margin-bottom:16px;
+      box-shadow:0 0 30px rgba(255,230,0,0.3);
+    ">
+      <img id="qrImage" src="" alt="QR Code"
+        style="width:200px; height:200px; display:block; border-radius:8px; object-fit:contain;"
+        onerror="this.style.display='none'; document.getElementById('qrPlaceholder').style.display='flex';"
+      />
+      <div id="qrPlaceholder" style="
+        width:200px; height:200px; display:none;
+        align-items:center; justify-content:center; flex-direction:column;
+        gap:10px; color:#333;
+      ">
+        <div style="font-size:3rem;">📱</div>
+        <div style="font-size:0.75rem; color:#666; text-align:center;">QR thanh toán<br>sẽ hiển thị tại đây</div>
+      </div>
+    </div>
 
-                    ctx.save();
-                    ctx.translate(textX, textY);
-                    ctx.rotate(mid + (mid > Math.PI/2 ? Math.PI : 0));
-                    ctx.font = 'bold 22px "Inter", sans-serif';
-                    ctx.fillStyle = 'white';
-                    ctx.shadowColor = 'black';
-                    ctx.shadowBlur = 10;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(short, 0, 0);
-                    ctx.restore();
-                }
+    <div style="font-family:'Fredoka One',cursive; font-size:0.9rem; color:rgba(255,255,255,0.6); margin-bottom:6px;">
+      Quét mã để thanh toán
+    </div>
+    <div style="
+      background:rgba(255,230,0,0.1); border:1px solid rgba(255,230,0,0.3);
+      border-radius:12px; padding:10px 14px; font-size:0.82rem; color:rgba(255,255,255,0.7);
+      line-height:1.6;
+    ">
+      📌 Sau khi thanh toán, vui lòng<br>xuất trình biên lai cho ban tổ chức
+    </div>
+  </div>
+</div>
 
-                // vẽ tâm
-                ctx.beginPath();
-                ctx.arc(cx, cy, 25, 0, 2*Math.PI);
-                ctx.fillStyle = '#f1c40f';
-                ctx.shadowBlur = 25;
-                ctx.shadowColor = 'gold';
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            }
+<style>
+@keyframes modalPop {
+  from { transform: scale(0.7) translateY(30px); opacity:0; }
+  to   { transform: scale(1) translateY(0);      opacity:1; }
+}
+</style>
 
-            // lấy segment index dựa trên góc của pointer (pointer ở -PI/2)
-            function getSegmentFromRotation(rot) {
-                const pointerAngle = -Math.PI / 2;
-                let raw = (pointerAngle) % (2*Math.PI);
-                if (raw < 0) raw += 2*Math.PI;
+<footer>
+  <p>🎯 Gian Hàng Trò Chơi · Vui Vẻ · Thử Thách · Giải Thưởng Hấp Dẫn 🎁</p>
+</footer>
 
-                for (let i = 0; i < angles.length; i++) {
-                    let s = (angles[i].start + rot) % (2*Math.PI);
-                    let e = (angles[i].end + rot) % (2*Math.PI);
-                    if (s < e) {
-                        if (raw >= s && raw < e) return i;
-                    } else {
-                        if (raw >= s || raw < e) return i;
-                    }
-                }
-                return 0;
-            }
+<script>
+// ===== PARTICLES =====
+(function createParticles(){
+  const container = document.getElementById('particles');
+  const colors = ['#FFE600','#FF2D78','#00F5FF','#FF6B00','#ff88cc','#88ffee'];
+  for(let i=0;i<25;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random()*8+3;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      left:${Math.random()*100}%;
+      animation-duration:${Math.random()*15+10}s;
+      animation-delay:${Math.random()*10}s;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      opacity:0.6;
+    `;
+    container.appendChild(p);
+  }
+})();
 
-            // quay
-            function startSpin() {
-                if (spinning) return;
-                spinning = true;
-                spinBtn.disabled = true;
+// ===== MUSIC =====
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+let musicPlaying = false;
+let musicNodes = [];
 
-                // random target theo đúng tỉ lệ (dựa trên segments đã shuffle)
-                const r = Math.random() * 100;
-                let cum = 0;
-                let targetIdx = 0;
-                for (let i = 0; i < segments.length; i++) {
-                    cum += segments[i].percent;
-                    if (r < cum) {
-                        targetIdx = i;
-                        break;
-                    }
-                }
+function createBeepMusic(){
+  const notes = [523,659,784,1047,784,659,523,392,523,659,784,659,523];
+  const durations = [0.15,0.15,0.15,0.3,0.15,0.15,0.3,0.15,0.15,0.15,0.3,0.15,0.3];
+  let time = audioCtx.currentTime;
+  notes.forEach((freq,i)=>{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.05, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time+durations[i]);
+    osc.start(time); osc.stop(time+durations[i]);
+    time += durations[i]+0.02;
+    musicNodes.push(osc);
+  });
+}
 
-                const targetSeg = angles[targetIdx];
-                const targetMid = (targetSeg.start + targetSeg.end) / 2;
-                const pointerAngle = -Math.PI / 2;
+function startMusic(){
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  createBeepMusic();
+  musicPlaying = true;
+  document.getElementById('musicBtn').textContent = '🔊';
+  document.getElementById('musicBtn').classList.add('playing');
+  musicInterval = setInterval(()=>{
+    if(musicPlaying) createBeepMusic();
+  }, 2500);
+}
 
-                let targetRotation = pointerAngle - targetMid;
-                targetRotation = ((targetRotation % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+let musicInterval;
+function toggleMusic(){
+  if(!musicPlaying){
+    startMusic();
+  } else {
+    clearInterval(musicInterval);
+    musicPlaying = false;
+    document.getElementById('musicBtn').textContent = '🎵';
+    document.getElementById('musicBtn').classList.remove('playing');
+  }
+}
+document.getElementById('musicBtn').onclick = toggleMusic;
 
-                const extraTurns = 10 + Math.floor(Math.random() * 8); // 10-17 vòng
-                const finalRotation = targetRotation + extraTurns * 2 * Math.PI;
+// Auto-play on first interaction
+document.addEventListener('click', function autoPlay(){
+  if(!musicPlaying) startMusic();
+  document.removeEventListener('click', autoPlay);
+}, { once: true });
 
-                const startRotation = rotation;
-                const delta = finalRotation - startRotation;
-                const duration = 3200;
-                const startTime = performance.now();
+// ===== SCROLL REVEAL =====
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
-                function animate(now) {
-                    const elapsed = now - startTime;
-                    const p = Math.min(elapsed / duration, 1);
-                    const ease = 1 - Math.pow(1 - p, 3);
-                    rotation = startRotation + delta * ease;
-                    drawWheel(rotation);
+// ===== LUCKY WHEEL =====
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const size = canvas.width;
+const cx = size/2, cy = size/2, r = size/2 - 10;
 
-                    if (p < 1) {
-                        animFrame = requestAnimationFrame(animate);
-                    } else {
-                        spinning = false;
-                        spinBtn.disabled = false;
-                        animFrame = null;
+const segments = [
+  { label: 'Thêm 1 Lượt', color: '#FFD700', emoji: '🎫', result: '+1', type: 'add1' },
+  { label: 'Không Có Gì', color: '#3a3a5c', emoji: '😐', result: '0', type: 'none' },
+  { label: 'Mất 1 Lượt', color: '#6644aa', emoji: '💸', result: '-1', type: 'lose' },
+  { label: 'Không Có Gì', color: '#2a2a4c', emoji: '😐', result: '0', type: 'none' },
+  { label: 'Thêm 1 Lượt', color: '#FFA500', emoji: '🎫', result: '+1', type: 'add1' },
+  { label: 'Không Có Gì', color: '#3a3a5c', emoji: '😐', result: '0', type: 'none' },
+  { label: 'Thêm 2 Lượt', color: '#FF2D78', emoji: '🎁', result: '+2', type: 'add2' },
+];
 
-                        const finalIdx = getSegmentFromRotation(rotation);
-                        const segRes = segments[finalIdx];
-                        let msg = '';
-                        if (segRes.label.includes('THÊM 1')) msg = '🎉 Bạn được THÊM 1 lượt!';
-                        else if (segRes.label.includes('THÊM 2')) msg = '🔥 SIÊU MAY: THÊM 2 LƯỢT!';
-                        else if (segRes.label.includes('MẤT')) msg = '😥 Rất tiếc, MẤT 1 lượt.';
-                        else msg = '🍃 KHÔNG CÓ GÌ, quay lại nhé!';
-                        resultDiv.innerHTML = msg;
-                    }
-                }
+let wheelAngle = 0;
+let isSpinning = false;
 
-                animFrame = requestAnimationFrame(animate);
-            }
+function drawWheel(angle) {
+  ctx.clearRect(0,0,size,size);
+  const segAngle = (2*Math.PI)/segments.length;
 
-            spinBtn.addEventListener('click', startSpin);
-            drawWheel(rotation);
+  segments.forEach((seg, i) => {
+    const startA = angle + i * segAngle - Math.PI/2;
+    const endA = startA + segAngle;
 
-            // XỬ LÝ NHẠC
-            const audio = document.getElementById('bgMusic');
-            const musicToggle = document.getElementById('musicToggle');
-            const musicIcon = document.getElementById('musicIcon');
-            let musicPlaying = false;
+    // Segment
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,startA,endA);
+    ctx.closePath();
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
-            musicToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (musicPlaying) {
-                    musicPlaying = false;
-                    audio.pause();
-                    musicIcon.className = 'fa-solid fa-music';
-                    musicToggle.classList.add('muted');
-                } else {
-                    audio.play()
-                        .then(() => {
-                            musicPlaying = true;
-                            musicIcon.className = 'fa-solid fa-volume-high';
-                            musicToggle.classList.remove('muted');
-                        })
-                        .catch(err => {
-                            alert('Nhấn lần nữa để phát nhạc (trình duyệt cần tương tác)');
-                        });
-                }
-            });
+    // Text
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(startA + segAngle/2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${size*0.045}px Nunito`;
+    ctx.fillText(seg.emoji + ' ' + seg.label, r-12, 5);
+    ctx.restore();
+  });
 
-            spinBtn.addEventListener('click', function once() {
-                if (!musicPlaying) {
-                    audio.play()
-                        .then(() => {
-                            musicPlaying = true;
-                            musicIcon.className = 'fa-solid fa-volume-high';
-                            musicToggle.classList.remove('muted');
-                        })
-                        .catch(() => {});
-                }
-            }, { once: true });
+  // Center circle
+  const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,30);
+  grad.addColorStop(0,'#fff');
+  grad.addColorStop(0.5,'#FFE600');
+  grad.addColorStop(1,'#FF6B00');
+  ctx.beginPath();
+  ctx.arc(cx,cy,28,0,2*Math.PI);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
 
-            audio.addEventListener('error', () => {
-                musicToggle.style.display = 'none';
-            });
+drawWheel(0);
 
-            window.addEventListener('resize', () => drawWheel(rotation));
-        })();
-    </script>
-    <!-- Hướng dẫn: upload file background-music.mp3 lên cùng thư mục với index.html để có nhạc -->
+function spinWheel(){
+  if(isSpinning) return;
+  isSpinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('wheelResult').innerHTML = '';
+
+  // Weighted random
+  const rand = Math.random();
+  let targetIdx;
+  if(rand < 0.05) targetIdx = 6; // add2
+  else if(rand < 0.25) targetIdx = 0; // add1 (first)
+  else if(rand < 0.45) targetIdx = 4; // add1 (second)
+  else if(rand < 0.65) targetIdx = 2; // lose
+  else {
+    const noneIdx = [1,3,5];
+    targetIdx = noneIdx[Math.floor(Math.random()*3)];
+  }
+
+  const segAngle = (2*Math.PI)/segments.length;
+  const targetAngle = -(targetIdx * segAngle) + Math.PI * (8 + Math.random()*4);
+  const startAngle = wheelAngle;
+  const duration = 4000;
+  const start = performance.now();
+
+  function animate(now){
+    const elapsed = now - start;
+    const progress = Math.min(elapsed/duration, 1);
+    const ease = 1 - Math.pow(1-progress, 4);
+    wheelAngle = startAngle + targetAngle * ease;
+    drawWheel(wheelAngle);
+
+    if(progress < 1){
+      requestAnimationFrame(animate);
+    } else {
+      isSpinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      showResult(segments[targetIdx]);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showResult(seg){
+  let msg, bgColor;
+  if(seg.type === 'add2'){
+    msg = '🎉 THÊM 2 LƯỢT! TUYỆT VỜI!';
+    bgColor = 'linear-gradient(135deg,#FF2D78,#c0002b)';
+    launchConfetti();
+  } else if(seg.type === 'add1'){
+    msg = '✨ Thêm 1 Lượt! Tốt lắm!';
+    bgColor = 'linear-gradient(135deg,#FFD700,#FF6B00)';
+    launchConfetti(10);
+  } else if(seg.type === 'lose'){
+    msg = '😭 Mất 1 Lượt! Chúc may mắn lần sau!';
+    bgColor = 'linear-gradient(135deg,#6644aa,#330066)';
+  } else {
+    msg = '😐 Không Có Gì! Hẹn gặp lại!';
+    bgColor = 'linear-gradient(135deg,#333,#555)';
+  }
+  document.getElementById('wheelResult').innerHTML =
+    `<div class="result-badge" style="background:${bgColor};box-shadow:0 0 30px rgba(255,45,120,0.3)">${msg}</div>`;
+
+  // Stop music after spin
+  clearInterval(musicInterval);
+  musicPlaying = false;
+  document.getElementById('musicBtn').textContent = '🎵';
+  document.getElementById('musicBtn').classList.remove('playing');
+
+  // Permanently disable spin button for this session
+  const btn = document.getElementById('spinBtn');
+  btn.disabled = true;
+  btn.textContent = '✅ ĐÃ QUAY';
+  btn.style.background = 'linear-gradient(135deg,#444,#222)';
+  btn.style.boxShadow = 'none';
+  btn.style.cursor = 'not-allowed';
+}
+
+// ===== CONFETTI =====
+function launchConfetti(count=30){
+  const colors = ['#FFE600','#FF2D78','#00F5FF','#FF6B00','#ff88ff','#88ffcc'];
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.cssText = `
+        left:${20+Math.random()*60}%;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        width:${6+Math.random()*8}px;
+        height:${6+Math.random()*8}px;
+        border-radius:${Math.random()>0.5?'50%':'0'};
+        animation-duration:${1.5+Math.random()*2}s;
+        animation-delay:${Math.random()*0.5}s;
+      `;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(), 3000);
+    }, i*50);
+  }
+}
+
+// ===== GAME 1: NÉM BONG BÓNG =====
+(function game1(){
+  const c = document.getElementById('game1Canvas');
+  const ctx = c.getContext('2d');
+  let W, H, balloons=[], darts=[], animId;
+
+  function resize(){
+    W = c.offsetWidth; H = c.offsetHeight;
+    c.width = W; c.height = H;
+  }
+  resize();
+  new ResizeObserver(resize).observe(c);
+
+  function mkBalloon(){
+    const colors = ['#FF2D78','#FF6B00','#FFE600','#00F5FF','#88FF00','#FF88FF'];
+    return {
+      x: Math.random()*(W-60)+30,
+      y: H + 50,
+      r: 18+Math.random()*12,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      speed: 0.4+Math.random()*0.6,
+      wobble: Math.random()*Math.PI*2,
+      wobbleSpeed: 0.02+Math.random()*0.02,
+      pop: false, popFrame: 0,
+    };
+  }
+
+  for(let i=0;i<6;i++){
+    const b = mkBalloon();
+    b.y = Math.random()*H;
+    balloons.push(b);
+  }
+
+  function drawBalloon(b){
+    if(b.pop){
+      ctx.save();
+      ctx.globalAlpha = 1 - b.popFrame/10;
+      for(let i=0;i<6;i++){
+        const a = (i/6)*Math.PI*2;
+        const d = b.popFrame*4;
+        ctx.beginPath();
+        ctx.arc(b.x+Math.cos(a)*d, b.y+Math.sin(a)*d, 4, 0, Math.PI*2);
+        ctx.fillStyle = b.color;
+        ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+    const ox = Math.sin(b.wobble)*5;
+    ctx.save();
+    // Shadow
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur = 15;
+    // Body
+    const gr = ctx.createRadialGradient(b.x+ox-b.r*0.3,b.y-b.r*0.3,1,b.x+ox,b.y,b.r);
+    gr.addColorStop(0,'rgba(255,255,255,0.6)');
+    gr.addColorStop(0.3,b.color);
+    gr.addColorStop(1,'rgba(0,0,0,0.3)');
+    ctx.beginPath();
+    ctx.arc(b.x+ox, b.y, b.r, 0, Math.PI*2);
+    ctx.fillStyle = gr;
+    ctx.fill();
+    // String
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(b.x+ox, b.y+b.r);
+    ctx.quadraticCurveTo(b.x+ox+10, b.y+b.r+15, b.x+ox, b.y+b.r+30);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawDart(d){
+    ctx.save();
+    ctx.translate(d.x, d.y);
+    ctx.rotate(d.angle);
+    ctx.shadowColor = '#00F5FF';
+    ctx.shadowBlur = 10;
+    // Body
+    ctx.fillStyle = '#aaa';
+    ctx.fillRect(-15, -2, 30, 4);
+    // Tip
+    ctx.fillStyle = '#silver';
+    ctx.beginPath();
+    ctx.moveTo(15,-2); ctx.lineTo(22,0); ctx.lineTo(15,2);
+    ctx.fillStyle = '#FFE600';
+    ctx.fill();
+    // Tail
+    ctx.fillStyle = '#FF2D78';
+    ctx.beginPath();
+    ctx.moveTo(-15,-2); ctx.lineTo(-22,-6); ctx.lineTo(-22,6); ctx.lineTo(-15,2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let frame=0;
+  function loop(){
+    animId = requestAnimationFrame(loop);
+    ctx.clearRect(0,0,W,H);
+    // BG gradient
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#050015');
+    bg.addColorStop(1,'#0a0025');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    frame++;
+
+    // Spawn
+    if(frame%90===0 && balloons.length<10) balloons.push(mkBalloon());
+
+    balloons.forEach(b=>{
+      if(!b.pop){ b.y-=b.speed; b.wobble+=b.wobbleSpeed; }
+      else b.popFrame++;
+      drawBalloon(b);
+    });
+    balloons = balloons.filter(b=>b.y>-80&&(!b.pop||b.popFrame<10));
+
+    // Shoot dart periodically
+    if(frame%120===0){
+      const target = balloons.find(b=>!b.pop);
+      if(target){
+        darts.push({
+          x:W/2, y:H,
+          tx:target.x, ty:target.y,
+          angle:-Math.PI/2,
+          speed:6, target
+        });
+      }
+    }
+
+    darts.forEach(d=>{
+      const dx=d.tx-d.x, dy=d.ty-d.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      d.angle = Math.atan2(dy,dx);
+      if(dist>8){
+        d.x += Math.cos(d.angle)*d.speed;
+        d.y += Math.sin(d.angle)*d.speed;
+      } else {
+        d.target.pop=true; d.done=true;
+      }
+      drawDart(d);
+    });
+    darts = darts.filter(d=>!d.done);
+  }
+  loop();
+})();
+
+// ===== GAME 2: NÉM PHI TIÊU =====
+(function game2(){
+  const c = document.getElementById('game2Canvas');
+  const ctx = c.getContext('2d');
+  let W, H, rotation=0, dartY, dartX, flying=false, dartAngle=0, score=0;
+  let darts_on_board = [];
+
+  function resize(){
+    W = c.offsetWidth; H = c.offsetHeight;
+    c.width = W; c.height = H;
+    dartX = W/2; dartY = H-20;
+  }
+  resize();
+  new ResizeObserver(resize).observe(c);
+
+  function drawTarget(cx,cy,r){
+    const rings = [
+      {r:r,color:'#222'},{r:r*0.8,color:'#FF2D78'},
+      {r:r*0.6,color:'#fff'},{r:r*0.4,color:'#FF2D78'},
+      {r:r*0.2,color:'#FFE600'}
+    ];
+    rings.forEach(ring=>{
+      ctx.beginPath();
+      ctx.arc(cx,cy,ring.r,0,Math.PI*2);
+      ctx.fillStyle=ring.color;
+      ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.2)';
+      ctx.lineWidth=1; ctx.stroke();
+    });
+    // Glow
+    ctx.shadowColor='#FF2D78'; ctx.shadowBlur=20;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,45,120,0.3)';
+    ctx.lineWidth=3; ctx.stroke();
+    ctx.shadowBlur=0;
+  }
+
+  function drawDartOnBoard(x,y,angle){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
+    ctx.fillStyle='#aaa'; ctx.fillRect(-15,-2,30,4);
+    ctx.fillStyle='#FFE600';
+    ctx.beginPath(); ctx.moveTo(15,-2); ctx.lineTo(22,0); ctx.lineTo(15,2); ctx.fill();
+    ctx.fillStyle='#FF2D78';
+    ctx.beginPath(); ctx.moveTo(-15,-2); ctx.lineTo(-22,-6); ctx.lineTo(-22,6); ctx.lineTo(-15,2); ctx.fill();
+    ctx.restore();
+  }
+
+  let flyDart={x:0,y:0,vx:0,vy:0,active:false};
+  let frame=0, boardY;
+
+  function loop(){
+    requestAnimationFrame(loop);
+    ctx.clearRect(0,0,W,H);
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#050015'); bg.addColorStop(1,'#0a002a');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    frame++;
+    rotation+=0.005;
+    boardY = H*0.35;
+    const boardX = W/2 + Math.sin(rotation)*W*0.15;
+
+    // Draw board
+    ctx.save();
+    ctx.translate(boardX, boardY);
+    ctx.rotate(Math.sin(rotation*0.3)*0.1);
+    drawTarget(0,0,Math.min(W,H)*0.28);
+    ctx.restore();
+
+    // Darts on board
+    darts_on_board.forEach(d=>{
+      drawDartOnBoard(boardX + d.ox, boardY + d.oy, d.angle);
+    });
+
+    // Auto shoot
+    if(frame%150===0 && !flyDart.active){
+      flyDart = {x:boardX, y:H-10, vx:0, vy:-8, active:true, tx:boardX, ty:boardY};
+    }
+
+    if(flyDart.active){
+      const dx=flyDart.tx-flyDart.x, dy=flyDart.ty-flyDart.y;
+      const angle=Math.atan2(dy,dx);
+      flyDart.x+=Math.cos(angle)*8; flyDart.y+=Math.sin(angle)*8;
+      drawDartOnBoard(flyDart.x, flyDart.y, angle);
+      if(Math.abs(flyDart.y-flyDart.ty)<10){
+        darts_on_board.push({ox:flyDart.x-boardX, oy:flyDart.y-boardY, angle});
+        if(darts_on_board.length>5) darts_on_board.shift();
+        flyDart.active=false;
+      }
+    }
+
+    // Score display
+    ctx.fillStyle='rgba(255,230,0,0.8)';
+    ctx.font=`bold ${W*0.04}px Nunito`;
+    ctx.textAlign='center';
+    ctx.fillText('🎯 Nhắm thẳng vào tâm!', W/2, H-10);
+  }
+  loop();
+})();
+
+// ===== GAME 3: NÉM LON =====
+(function game3(){
+  const c = document.getElementById('game3Canvas');
+  const ctx = c.getContext('2d');
+  let W, H, frame=0;
+  let cans=[], ball={x:0,y:0,r:12,active:false,vx:0,vy:0};
+  let knocked=false, resetTimer=0;
+
+  function resize(){
+    W=c.offsetWidth; H=c.offsetHeight;
+    c.width=W; c.height=H;
+    resetCans();
+    ball={x:W/2,y:H-20,r:12,active:false,vx:0,vy:0};
+  }
+  resize();
+  new ResizeObserver(resize).observe(c);
+
+  function resetCans(){
+    cans=[];
+    const baseY=H*0.55, canW=22, canH=32, gap=4;
+    // Row 3 (bottom): 3 cans
+    for(let i=0;i<3;i++) cans.push({x:W/2+(i-1)*(canW+gap),y:baseY,vx:0,vy:0,fallen:false});
+    // Row 2: 2 cans
+    for(let i=0;i<2;i++) cans.push({x:W/2+(i-0.5)*(canW+gap),y:baseY-canH-3,vx:0,vy:0,fallen:false});
+    // Row 1: 1 can
+    cans.push({x:W/2,y:baseY-2*(canH+3),vx:0,vy:0,fallen:false});
+    knocked=false;
+  }
+
+  function drawCan(can){
+    if(can.fallen) return;
+    ctx.save();
+    ctx.translate(can.x,can.y);
+    const cW=22,cH=32;
+    const gr=ctx.createLinearGradient(-cW/2,0,cW/2,0);
+    gr.addColorStop(0,'#cc3300'); gr.addColorStop(0.3,'#ff5533');
+    gr.addColorStop(0.7,'#ff3300'); gr.addColorStop(1,'#991100');
+    ctx.fillStyle=gr;
+    ctx.beginPath();
+    ctx.roundRect(-cW/2,-cH/2,cW,cH,3);
+    ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.font=`bold ${cW*0.55}px Nunito`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('🥫','0','1');
+    ctx.fillStyle='rgba(255,255,255,0.2)';
+    ctx.fillRect(-cW/2,-cH/2,cW*0.3,cH);
+    ctx.restore();
+  }
+
+  function drawBall(b){
+    ctx.save();
+    ctx.shadowColor='#FFE600'; ctx.shadowBlur=15;
+    const gr=ctx.createRadialGradient(b.x-b.r*0.3,b.y-b.r*0.3,1,b.x,b.y,b.r);
+    gr.addColorStop(0,'#fff'); gr.addColorStop(0.4,'#FFE600'); gr.addColorStop(1,'#FF6B00');
+    ctx.fillStyle=gr;
+    ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function loop(){
+    requestAnimationFrame(loop);
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#050015'); bg.addColorStop(1,'#001020');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    frame++;
+
+    // Ground line
+    ctx.strokeStyle='rgba(255,230,0,0.2)';
+    ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,H*0.72); ctx.lineTo(W,H*0.72); ctx.stroke();
+
+    // Auto throw
+    if(!ball.active && frame%200===0){
+      ball={x:W/2,y:H-10,r:12,active:true,vx:0,vy:-10};
+    }
+
+    if(ball.active){
+      ball.vy+=0.3; ball.x+=ball.vx; ball.y+=ball.vy;
+      // Hit cans
+      cans.forEach(can=>{
+        if(can.fallen) return;
+        if(Math.abs(ball.x-can.x)<22 && Math.abs(ball.y-can.y)<22){
+          can.fallen=true;
+          can.vx=(can.x-ball.x)*0.2+(Math.random()-0.5)*3;
+          can.vy=-5-Math.random()*3;
+          knocked=true;
+        }
+      });
+      if(ball.y>H+50) ball.active=false;
+    }
+
+    // Check reset
+    if(knocked && cans.every(c=>c.fallen)){
+      resetTimer++;
+      if(resetTimer>120){ resetCans(); resetTimer=0; }
+    }
+
+    cans.forEach(c=>drawCan(c));
+    if(ball.active) drawBall(ball);
+
+    // Hint
+    ctx.fillStyle='rgba(255,230,0,0.6)';
+    ctx.font=`bold ${W*0.04}px Nunito`;
+    ctx.textAlign='center';
+    ctx.fillText('🎳 Ném đổ hết lon để thắng!', W/2, H-8);
+  }
+  loop();
+})();
+
+// ===== QR MODAL =====
+// Placeholder QR — thay URL này bằng ảnh QR ngân hàng thật
+const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PLACEHOLDER_BANK_QR';
+
+function showQR(gameName){
+  document.getElementById('qrGameName').textContent = '🎮 ' + gameName;
+  document.getElementById('qrImage').src = QR_IMAGE_URL;
+  document.getElementById('qrPlaceholder').style.display = 'none';
+  document.getElementById('qrImage').style.display = 'block';
+  const modal = document.getElementById('qrModal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQR(){
+  document.getElementById('qrModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+document.getElementById('qrModal').addEventListener('click', function(e){
+  if(e.target === this) closeQR();
+});
+
+// ===== AUTO START MUSIC ATTEMPT =====
+setTimeout(()=>{
+  try{
+    if(!musicPlaying && audioCtx.state!=='running'){
+      audioCtx.resume().then(()=>startMusic()).catch(()=>{});
+    }
+  }catch(e){}
+},500);
+</script>
 </body>
 </html>
