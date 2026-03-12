@@ -803,36 +803,45 @@ function spinWheel(){
   document.getElementById('spinBtn').disabled = true;
   document.getElementById('wheelResult').innerHTML = '';
 
-  // Weighted random
+  // Weighted random pick
   const rand = Math.random();
   let targetIdx;
-  if(rand < 0.05) targetIdx = 6; // add2
-  else if(rand < 0.25) targetIdx = 0; // add1 (first)
-  else if(rand < 0.45) targetIdx = 4; // add1 (second)
-  else if(rand < 0.65) targetIdx = 2; // lose
-  else {
-    const noneIdx = [1,3,5];
-    targetIdx = noneIdx[Math.floor(Math.random()*3)];
-  }
+  if(rand < 0.05)       targetIdx = 6;                                          // add2  5%
+  else if(rand < 0.25)  targetIdx = 0;                                          // add1  20%
+  else if(rand < 0.45)  targetIdx = 4;                                          // add1  20%
+  else if(rand < 0.65)  targetIdx = 2;                                          // lose  20%
+  else { const n=[1,3,5]; targetIdx = n[Math.floor(Math.random()*3)]; }         // none  55%
 
-  const segAngle = (2*Math.PI)/segments.length;
-  const targetAngle = -(targetIdx * segAngle) + Math.PI * (8 + Math.random()*4);
+  const segAngle = (2*Math.PI) / segments.length;
+
+  // In drawWheel: centre of segment i = wheelAngle + i*segAngle - PI/2 + segAngle/2
+  // Pointer is at top → we need centre = -PI/2 + 2πk
+  //   wheelAngle + (targetIdx + 0.5)*segAngle = 2πk
+  //   wheelAngle = -(targetIdx + 0.5)*segAngle + 2πk
+  const baseAngle = -(targetIdx + 0.5) * segAngle;
+  const extraSpins = 6 + Math.floor(Math.random() * 3); // 6–8 full clockwise spins
+  const minFinal   = wheelAngle + extraSpins * 2 * Math.PI;
+  const k          = Math.ceil((minFinal - baseAngle) / (2 * Math.PI));
+  const finalAngle = baseAngle + k * 2 * Math.PI;
+
   const startAngle = wheelAngle;
-  const duration = 4000;
-  const start = performance.now();
+  const duration   = 5000;
+  const start      = performance.now();
 
   function animate(now){
-    const elapsed = now - start;
-    const progress = Math.min(elapsed/duration, 1);
-    const ease = 1 - Math.pow(1-progress, 4);
-    wheelAngle = startAngle + targetAngle * ease;
+    const elapsed  = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease-out quart
+    const ease = 1 - Math.pow(1 - progress, 4);
+    wheelAngle = startAngle + (finalAngle - startAngle) * ease;
     drawWheel(wheelAngle);
 
     if(progress < 1){
       requestAnimationFrame(animate);
     } else {
+      wheelAngle = finalAngle;
+      drawWheel(wheelAngle);
       isSpinning = false;
-      document.getElementById('spinBtn').disabled = false;
       showResult(segments[targetIdx]);
     }
   }
