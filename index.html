@@ -2,69 +2,528 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Gian hàng phiêu lưu · quay số & ném</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Gian hàng game · quay số & ném</title>
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
         }
-
         body {
+            background: #0d0f1c;
+            background: radial-gradient(circle at 50% 0%, #1a1f35, #0a0c18);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            background: radial-gradient(circle at 30% 10%, #0b0f1c, #03050c);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 12px;
             color: #fff;
         }
-
-        .container {
-            max-width: 480px;
+        .app {
+            max-width: 460px;
             width: 100%;
-            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 28px;
-            position: relative;
+            gap: 22px;
         }
 
-        /* glassmorphism + neon glow */
-        .glass-card {
-            background: rgba(10, 20, 30, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 255, 255, 0.25);
-            border-radius: 36px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 255, 0.3);
-            padding: 24px 18px;
-            transition: all 0.2s ease;
+        /* KHỐI VÒNG QUAY */
+        .wheel-block {
+            background: rgba(20, 30, 45, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 40px;
+            padding: 20px 16px 25px;
+            box-shadow: 0 20px 40px #00000080, 0 0 25px #00ffff40;
         }
-
-        /* vòng quay nổi bật */
-        .wheel-section {
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
         .wheel-title {
-            font-size: 1.8rem;
+            font-size: 1.9rem;
             font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #a5f0ff, #ffb3ff);
+            text-align: center;
+            background: linear-gradient(135deg, #a0f0ff, #ffb8ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .wheel-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 20px;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 50%;
+            background: #1f2a3f;
+            box-shadow: 0 0 0 4px #00ffff99, 0 15px 30px black;
+            transition: box-shadow 0.2s;
+        }
+        .pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 35px solid #f9d77e;
+            filter: drop-shadow(0 8px 6px #000000cc);
+            z-index: 5;
+        }
+        .spin-btn {
+            background: linear-gradient(145deg, #00bbff, #0066a0);
+            border: none;
+            color: white;
+            font-weight: 800;
+            font-size: 2rem;
+            padding: 16px 0;
+            width: 80%;
+            display: block;
+            margin: 5px auto 0;
+            border-radius: 60px;
+            box-shadow: 0 9px 0 #003f66, 0 10px 25px #00aaff;
+            cursor: pointer;
+            transition: 0.1s linear;
+            text-transform: uppercase;
+            border: 1px solid #aff0ff;
+        }
+        .spin-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 4px 0 #003f66, 0 10px 20px cyan;
+        }
+        .spin-btn:disabled {
+            opacity: 0.5;
+            transform: translateY(5px);
+            box-shadow: 0 4px 0 #003f66;
+            pointer-events: none;
+        }
+        .result-msg {
+            background: #1a2637;
+            padding: 15px 10px;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 15px;
+            border: 1px solid gold;
+            box-shadow: inset 0 2px 8px black;
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        /* BA GAME */
+        .games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .game-item {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 34px;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 10px 30px #ffd70030;
+            transition: 0.25s;
+        }
+        .game-icon {
+            font-size: 3.5rem;
+            min-width: 80px;
+            text-align: center;
+            filter: drop-shadow(0 0 10px cyan);
+            background: #15202b;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffcc66;
+        }
+        .game-info h3 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffdb8a, #ffaa66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        .game-info p {
+            font-size: 1rem;
+            color: #bcd0f0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .game-info i {
+            color: #0ff;
+        }
+
+        /* nút nhạc */
+        .music-ctrl {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e2a47;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            color: white;
+            border: 2px solid cyan;
+            box-shadow: 0 0 30px cyan;
+            cursor: pointer;
+            z-index: 999;
+            transition: 0.2s;
+        }
+        .music-ctrl.muted {
+            border-color: #888;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+        footer {
+            text-align: center;
+            color: #9aaec9;
+            font-size: 1rem;
+            margin: 10px 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- VÒNG QUAY -->
+        <div class="wheel-block">
+            <div class="wheel-title">🎰 LADY LUCKY</div>
+            <div class="wheel-container">
+                <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                <div class="pointer"></div>
+            </div>
+            <button class="spin-btn" id="spinBtn">⚡QUAY⚡</button>
+            <div class="result-msg" id="wheelResult">🔥 Chờ bạn quay 🔥</div>
+        </div>
+
+        <!-- 3 GAME -->
+        <div class="games-list">
+            <!-- Ném phi tiêu vào bong bóng -->
+            <div class="game-item">
+                <div class="game-icon"><i class="fa-regular fa-circle-dot"></i><i class="fa-solid fa-dharmachakra"></i></div>
+                <div class="game-info">
+                    <h3>BONG BÓNG & PHI TIÊU</h3>
+                    <p><i class="fa-solid fa-bullseye"></i> Ném vỡ bong bóng lơ lửng</p>
+                </div>
+            </div>
+            <!-- Ném phi tiêu vào bia -->
+            <div class="game-item">
+                <div class="game-icon"><i class="fa-solid fa-crosshairs"></i></div>
+                <div class="game-info">
+                    <h3>BIA ĐIỂM CAO</h3>
+                    <p><i class="fa-solid fa-dart"></i> Phi tiêu hồng tâm tính điểm</p>
+                </div>
+            </div>
+            <!-- Ném lon -->
+            <div class="game-item">
+                <div class="game-icon"><i class="fa-solid fa-beer-can"></i><i class="fa-solid fa-bolt"></i></div>
+                <div class="game-info">
+                    <h3>ĐỔ CHỒNG LON</h3>
+                    <p><i class="fa-solid fa-cubes"></i> Bóng trúng lon, đổ hết</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            📱 quét QR vào hội game thủ 📱
+        </footer>
+
+        <!-- Nút nhạc -->
+        <div class="music-ctrl muted" id="musicToggle">
+            <i class="fa-solid fa-music" id="musicIcon"></i>
+        </div>
+    </div>
+
+    <!-- file nhạc nền (cần upload cùng thư mục) -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="background-music.mp3" type="audio/mpeg">
+        <!-- trình duyệt sẽ bỏ qua nếu không có file -->
+    </audio>
+
+    <script>
+        (function() {
+            // ------------------------------------------------------------
+            // VÒNG QUAY CHUẨN XÁC VỚI TỶ LỆ BẠN YÊU CẦU
+            // 2 ô "Thêm 1 lượt" : 20% (mỗi ô 10%)
+            // 1 ô "Thêm 2 lượt" : 5%
+            // 1 ô "Mất 1 lượt"   : 20%
+            // 3 ô "Không có gì"  : 50% (mỗi ô 16.6666667%)
+            // ------------------------------------------------------------
+            const segments = [
+                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#2ecc71' },   // ô 1/2 của 20%
+                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#27ae60' },   // ô 2/2
+                { label: 'THÊM 2 LƯỢT', percent: 5, color: '#f39c12' },    // 1 ô 5%
+                { label: 'MẤT 1 LƯỢT', percent: 20, color: '#e67e22' },    // 1 ô 20%
+                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#7f8c8d' }, // 3 ô giống nhau
+                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#95a5a6' },
+                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#bdc3c7' }
+            ];
+
+            // tính toán góc cho mỗi segment
+            const angles = [];
+            let start = 0;
+            segments.forEach(seg => {
+                const angle = (seg.percent / 100) * Math.PI * 2;
+                angles.push({
+                    start: start,
+                    end: start + angle,
+                    label: seg.label,
+                    color: seg.color
+                });
+                start += angle;
+            });
+
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const spinBtn = document.getElementById('spinBtn');
+            const resultDiv = document.getElementById('wheelResult');
+
+            let rotation = 0; // radian hiện tại
+            let spinning = false;
+            let animFrame = null;
+
+            function drawWheel(rotateRad) {
+                ctx.clearRect(0, 0, 400, 400);
+                const cx = 200, cy = 200;
+                const radius = 180;
+
+                for (let i = 0; i < angles.length; i++) {
+                    const seg = angles[i];
+                    const startAng = seg.start + rotateRad;
+                    const endAng = seg.end + rotateRad;
+
+                    // vẽ múi
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.arc(cx, cy, radius, startAng, endAng);
+                    ctx.closePath();
+                    ctx.fillStyle = seg.color;
+                    ctx.fill();
+                    ctx.strokeStyle = '#222';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // vẽ nhãn
+                    const mid = (startAng + endAng) / 2;
+                    const textX = cx + Math.cos(mid) * 100;
+                    const textY = cy + Math.sin(mid) * 100;
+
+                    let short = '';
+                    if (seg.label.includes('THÊM 1')) short = '+1';
+                    else if (seg.label.includes('THÊM 2')) short = '+2';
+                    else if (seg.label.includes('MẤT')) short = '-1';
+                    else short = '0';
+
+                    ctx.save();
+                    ctx.translate(textX, textY);
+                    ctx.rotate(mid + (mid > Math.PI/2 ? Math.PI : 0));
+                    ctx.font = 'bold 22px "Inter", sans-serif';
+                    ctx.fillStyle = 'white';
+                    ctx.shadowColor = 'black';
+                    ctx.shadowBlur = 10;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(short, 0, 0);
+                    ctx.restore();
+                }
+
+                // vẽ tâm
+                ctx.beginPath();
+                ctx.arc(cx, cy, 25, 0, 2*Math.PI);
+                ctx.fillStyle = '#f1c40f';
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = 'gold';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // lấy segment index dựa trên góc của pointer (pointer ở -PI/2)
+            function getSegmentFromRotation(rot) {
+                // góc pointer cố định = -PI/2 (trên đỉnh)
+                const pointerAngle = -Math.PI / 2;
+                // góc thực tế của điểm múi tại pointer: (góc segment + rot) % 2pi
+                // ta muốn tìm segment mà pointerAngle nằm trong khoảng [start+rot , end+rot] (tính mod 2pi)
+                let angleOnWheel = pointerAngle; // vì pointerAngle không đổi, nhưng cần tìm segment
+                // đưa angleOnWheel về [0, 2pi]
+                let raw = (angleOnWheel) % (2*Math.PI);
+                if (raw < 0) raw += 2*Math.PI;
+
+                for (let i = 0; i < angles.length; i++) {
+                    let s = (angles[i].start + rot) % (2*Math.PI);
+                    let e = (angles[i].end + rot) % (2*Math.PI);
+                    // xử lý wrap-around
+                    if (s < e) {
+                        if (raw >= s && raw < e) return i;
+                    } else {
+                        // đoạn qua 0
+                        if (raw >= s || raw < e) return i;
+                    }
+                }
+                return 0; // fallback
+            }
+
+            // quay
+            function startSpin() {
+                if (spinning) return;
+                spinning = true;
+                spinBtn.disabled = true;
+
+                // random target theo đúng tỉ lệ
+                const r = Math.random() * 100;
+                let cum = 0;
+                let targetIdx = 0;
+                for (let i = 0; i < segments.length; i++) {
+                    cum += segments[i].percent;
+                    if (r < cum) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+
+                // góc đích: pointer nên nằm giữa segment targetIdx
+                const targetSeg = angles[targetIdx];
+                const targetMid = (targetSeg.start + targetSeg.end) / 2; // rad trong khoảng [0, 2pi)
+                const pointerAngle = -Math.PI / 2; // trên đỉnh
+
+                // góc cần xoay để targetMid + rotation = pointerAngle (mod 2pi)
+                // => rotation = pointerAngle - targetMid + k*2pi
+                let targetRotation = pointerAngle - targetMid;
+                // chuẩn hóa về [0, 2pi)
+                targetRotation = ((targetRotation % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+
+                // thêm vài vòng quay
+                const extraTurns = 10 + Math.floor(Math.random() * 8); // 10-17 vòng
+                const finalRotation = targetRotation + extraTurns * 2 * Math.PI;
+
+                const startRotation = rotation;
+                const delta = finalRotation - startRotation;
+                const duration = 3200; // ms
+                const startTime = performance.now();
+
+                function animate(now) {
+                    const elapsed = now - startTime;
+                    const p = Math.min(elapsed / duration, 1);
+                    // easing out cubic
+                    const ease = 1 - Math.pow(1 - p, 3);
+                    rotation = startRotation + delta * ease;
+                    drawWheel(rotation);
+
+                    if (p < 1) {
+                        animFrame = requestAnimationFrame(animate);
+                    } else {
+                        // dừng
+                        spinning = false;
+                        spinBtn.disabled = false;
+                        animFrame = null;
+
+                        const finalIdx = getSegmentFromRotation(rotation);
+                        const segRes = segments[finalIdx];
+                        let msg = '';
+                        if (segRes.label.includes('THÊM 1')) msg = '🎉 Bạn được THÊM 1 lượt!';
+                        else if (segRes.label.includes('THÊM 2')) msg = '🔥 SIÊU MAY: THÊM 2 LƯỢT!';
+                        else if (segRes.label.includes('MẤT')) msg = '😥 Rất tiếc, MẤT 1 lượt.';
+                        else msg = '🍃 KHÔNG CÓ GÌ, quay lại nhé!';
+                        resultDiv.innerHTML = msg;
+                    }
+                }
+
+                animFrame = requestAnimationFrame(animate);
+            }
+
+            spinBtn.addEventListener('click', startSpin);
+            drawWheel(rotation);
+
+            // XỬ LÝ NHẠC
+            const audio = document.getElementById('bgMusic');
+            const musicToggle = document.getElementById('musicToggle');
+            const musicIcon = document.getElementById('musicIcon');
+            let musicPlaying = false;
+
+            // Hàm bật/tắt nhạc
+            function toggleMusic(forcePlay = false) {
+                if (musicPlaying || forcePlay) {
+                    audio.play()
+                        .then(() => {
+                            musicPlaying = true;
+                            musicIcon.className = 'fa-solid fa-volume-high';
+                            musicToggle.classList.remove('muted');
+                        })
+                        .catch(e => {
+                            // vẫn cần tương tác trực tiếp
+                            musicPlaying = false;
+                            musicIcon.className = 'fa-solid fa-music';
+                            musicToggle.classList.add('muted');
+                            if (!forcePlay) alert('Chạm lần nữa để phát nhạc (cần tương tác)');
+                        });
+                } else {
+                    audio.pause();
+                    musicPlaying = false;
+                    musicIcon.className = 'fa-solid fa-music';
+                    musicToggle.classList.add('muted');
+                }
+            }
+
+            // Khi bấm nút nhạc
+            musicToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (musicPlaying) {
+                    // đang phát -> tắt
+                    musicPlaying = false;
+                    audio.pause();
+                    musicIcon.className = 'fa-solid fa-music';
+                    musicToggle.classList.add('muted');
+                } else {
+                    // đang tắt -> bật (play)
+                    audio.play()
+                        .then(() => {
+                            musicPlaying = true;
+                            musicIcon.className = 'fa-solid fa-volume-high';
+                            musicToggle.classList.remove('muted');
+                        })
+                        .catch(err => {
+                            alert('Nhấn lần nữa để phát nhạc (trình duyệt cần tương tác)');
+                        });
+                }
+            });
+
+            // Tự động thử phát nhạc ngay khi người dùng bấm QUAY lần đầu (tương tác)
+            spinBtn.addEventListener('click', function once() {
+                if (!musicPlaying) {
+                    audio.play()
+                        .then(() => {
+                            musicPlaying = true;
+                            musicIcon.className = 'fa-solid fa-volume-high';
+                            musicToggle.classList.remove('muted');
+                        })
+                   margin-bottom: 12px;
             filter: drop-shadow(0 0 10px cyan);
         }
 
