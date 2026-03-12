@@ -2,190 +2,519 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gian Hàng Trò Chơi Siêu Ngầu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Gian hàng phiêu lưu · quay số & ném</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        body { font-family: 'Press Start 2P', sans-serif; }
-        .neon { text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff; }
-        .wheel-container { filter: drop-shadow(0 0 30px #ffff00); }
-        .game-card img { transition: all 0.6s cubic-bezier(0.34,1.56,0.64,1); }
-        .game-card:hover img { transform: scale(1.15) rotate(3deg); filter: brightness(1.3) drop-shadow(0 0 25px #00ff00); }
-        @keyframes pop { 0%{transform:scale(0.8)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
-        .pop { animation: pop 0.8s ease; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 10%, #0b0f1c, #03050c);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            position: relative;
+        }
+
+        /* glassmorphism + neon glow */
+        .glass-card {
+            background: rgba(10, 20, 30, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            border-radius: 36px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 255, 0.3);
+            padding: 24px 18px;
+            transition: all 0.2s ease;
+        }
+
+        /* vòng quay nổi bật */
+        .wheel-section {
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wheel-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #a5f0ff, #ffb3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 10px cyan);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 10px auto 20px;
+        }
+
+        canvas#wheelCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.6), 0 20px 30px black;
+            transition: box-shadow 0.2s;
+            background: #1e2a3a;
+            touch-action: none; /* tránh cuộn khi chạm canvas */
+        }
+
+        .pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 30px solid #ffd966;
+            filter: drop-shadow(0 4px 4px black);
+            z-index: 5;
+        }
+
+        .spin-btn {
+            background: linear-gradient(145deg, #00c9ff, #0099cc);
+            border: none;
+            color: white;
+            font-weight: 800;
+            font-size: 1.5rem;
+            padding: 16px 32px;
+            border-radius: 60px;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 0 #005577, 0 10px 30px #00ffff80;
+            transition: all 0.1s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            margin-top: 8px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .spin-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 #005577, 0 10px 20px cyan;
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 16px;
+            min-height: 3rem;
+            text-shadow: 0 0 8px magenta;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            width: auto;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 3 thẻ game — bố cục song song đẹp */
+        .games-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 40px;
+            padding: 20px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+            transition: all 0.25s;
+            animation: float 5s infinite ease-in-out;
+            transform-origin: center;
+        }
+
+        .game-card:nth-child(2) { animation-delay: 0.7s; }
+        .game-card:nth-child(3) { animation-delay: 1.3s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); filter: brightness(1.1); }
+            100% { transform: translateY(0px); }
+        }
+
+        .game-card:hover {
+            border-color: cyan;
+            box-shadow: 0 0 35px cyan;
+        }
+
+        .game-icon {
+            font-size: 3.4rem;
+            min-width: 80px;
+            text-align: center;
+            filter: drop-shadow(0 0 8px gold);
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255,255,0,0.6);
+        }
+
+        .game-info h3 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fcee9f, #ffba7a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .game-info p {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #ccddee;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .game-info i {
+            color: #0ff;
+        }
+
+        /* nút nhạc */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e2a3a;
+            border: 2px solid cyan;
+            border-radius: 60px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 25px cyan;
+            backdrop-filter: blur(10px);
+            z-index: 99;
+            transition: 0.2s;
+        }
+
+        .music-control.muted {
+            border-color: gray;
+            box-shadow: none;
+            opacity: 0.8;
+        }
+
+        /* micro interactions */
+        .glow-text {
+            text-shadow: 0 0 9px #0ff, 0 0 18px #f0f;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #a9b9d0;
+            margin-top: 10px;
+        }
+
+        /* responsive touch */
+        @media (max-width: 380px) {
+            .canvas-wrapper { width: 240px; height: 240px; }
+            .game-icon { width: 70px; height: 70px; font-size: 3rem; }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-950 via-black to-red-950 text-white overflow-x-hidden">
-    <audio id="bgMusic" src="music.mp3" autoplay loop></audio>
-
-    <!-- VÒNG QUAY MAY MẮN -->
-    <div class="min-h-screen flex flex-col items-center justify-center py-10 px-4">
-        <h1 class="text-6xl md:text-8xl font-bold neon mb-8 text-center tracking-widest pop">VÒNG QUAY MAY MẮN</h1>
-        
-        <div class="wheel-container relative flex flex-col items-center">
-            <canvas id="wheel" width="420" height="420" class="rounded-full border-8 border-yellow-400 bg-black"></canvas>
-            
-            <!-- Mũi tên -->
-            <div class="absolute top-[-10px] left-1/2 -translate-x-1/2 w-0 h-0 
-                        border-l-[25px] border-r-[25px] border-b-[50px] 
-                        border-l-transparent border-r-transparent border-b-red-500 z-10"></div>
-            
-            <button onclick="spin()" id="spinBtn"
-                    class="mt-8 px-16 py-6 bg-yellow-400 hover:bg-yellow-300 text-black text-3xl font-bold rounded-3xl shadow-2xl transition-all active:scale-95">
-                QUAY NGAY!
-            </button>
+<body>
+    <div class="container">
+        <!-- VÒNG QUAY MAY MẮN -->
+        <div class="glass-card wheel-section">
+            <h2 class="wheel-title">🎲 VÒNG QUAY PHIÊU LƯU</h2>
+            <div class="canvas-wrapper">
+                <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                <div class="pointer"></div>
+            </div>
+            <button class="spin-btn" id="spinButton"><i class="fa-solid fa-rotate-right"></i> QUAY</button>
+            <div id="wheelResult" class="result-message">⚡ chờ lệnh...</div>
         </div>
-        
-        <p class="mt-12 text-xl text-yellow-300">Chạm để quay - Thêm lượt chơi ngay!</p>
-    </div>
 
-    <!-- 3 TRÒ CHƠI -->
-    <div class="max-w-7xl mx-auto px-6 pb-20">
-        <h2 class="text-5xl font-bold text-center neon mb-16">3 TRÒ CHƠI SIÊU NGẦU</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <!-- Game 1 -->
-            <div class="game-card bg-zinc-900/80 rounded-3xl overflow-hidden border-4 border-pink-500 shadow-2xl">
-                <img src="https://picsum.photos/id/201/800/500" class="w-full h-80 object-cover">
-                <div class="p-8">
-                    <h3 class="text-3xl font-bold mb-3">NÉM PHI TIÊU BONG BÓNG</h3>
-                    <p class="text-pink-300">Vỡ bong bóng - Ăn điểm khủng!</p>
+        <!-- 3 GAME GIỚI THIỆU -->
+        <div class="games-grid">
+            <!-- Game 1: Ném phi tiêu vào bong bóng -->
+            <div class="game-card">
+                <div class="game-icon"><i class="fa-solid fa-dharmachakra"></i> <i class="fa-regular fa-circle-dot"></i></div>
+                <div class="game-info">
+                    <h3>BONG BÓNG & PHI TIÊU</h3>
+                    <p><i class="fa-solid fa-bullseye"></i> Ném phi tiêu vỡ bong bóng lơ lửng</p>
+                    <p><i class="fa-regular fa-star"></i> Độ chính xác + phản xạ</p>
                 </div>
             </div>
-            
-            <!-- Game 2 -->
-            <div class="game-card bg-zinc-900/80 rounded-3xl overflow-hidden border-4 border-cyan-500 shadow-2xl">
-                <img src="https://picsum.photos/id/29/800/500" class="w-full h-80 object-cover">
-                <div class="p-8">
-                    <h3 class="text-3xl font-bold mb-3">NÉM PHI TIÊU VÀO BIA</h3>
-                    <p class="text-cyan-300">Trúng đích - Uống bia miễn phí!</p>
+            <!-- Game 2: Ném phi tiêu vào bia -->
+            <div class="game-card">
+                <div class="game-icon"><i class="fa-solid fa-crosshairs"></i></div>
+                <div class="game-info">
+                    <h3>BIA TRUYỀN THỐNG</h3>
+                    <p><i class="fa-solid fa-dart"></i> Phi tiêu cắm hồng tâm, tính điểm</p>
+                    <p><i class="fa-regular fa-clock"></i> 3 lượt ném / lượt chơi</p>
                 </div>
             </div>
-            
-            <!-- Game 3 -->
-            <div class="game-card bg-zinc-900/80 rounded-3xl overflow-hidden border-4 border-lime-500 shadow-2xl">
-                <img src="https://picsum.photos/id/160/800/500" class="w-full h-80 object-cover">
-                <div class="p-8">
-                    <h3 class="text-3xl font-bold mb-3">NÉM LON</h3>
-                    <p class="text-lime-300">Đập đổ tất cả - Thắng lớn!</p>
+            <!-- Game 3: Ném lon -->
+            <div class="game-card">
+                <div class="game-icon"><i class="fa-solid fa-beer-can"></i><i class="fa-solid fa-bolt"></i></div>
+                <div class="game-info">
+                    <h3>ĐỔ LON BIA</h3>
+                    <p><i class="fa-solid fa-cubes"></i> Ném bóng trúng chồng lon</p>
+                    <p><i class="fa-solid fa-gift"></i> Quà tặng siêu ngầu</p>
                 </div>
             </div>
         </div>
+
+        <footer>
+            ✦ quét QR để nhập hội ✦
+        </footer>
+
+        <!-- nút điều khiển nhạc (nổi) -->
+        <div class="music-control" id="musicToggle">
+            <i class="fa-solid fa-music" id="musicIcon"></i>
+        </div>
     </div>
+
+    <!-- audio element (tự động load, chờ tương tác) -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="background-music.mp3" type="audio/mpeg">
+        <!-- fallback nếu không có file mp3, vẫn hiển thị web -->
+    </audio>
 
     <script>
-        // Tailwind
-        tailwind.config = { content: [], theme: { extend: {} } }
-        
-        // Music
-        window.onload = () => {
-            const music = document.getElementById('bgMusic')
-            music.volume = 0.6
-            music.play().catch(() => {})
-        }
+        (function() {
+            // ------------------------ VÒNG QUAY -----------------------------
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const spinBtn = document.getElementById('spinButton');
+            const resultDiv = document.getElementById('wheelResult');
 
-        // Wheel
-        const canvas = document.getElementById('wheel')
-        const ctx = canvas.getContext('2d')
-        const segments = 7
-        const prizes = ["Thêm 1 lượt","Thêm 1 lượt","Thêm 2 lượt","Mất 1 lượt","Không có gì","Không có gì","Không có gì"]
-        const colors = ["#ff00ff","#00ffff","#ffff00","#ff0088","#00ff88","#8800ff","#ff8800"]
-        let rotation = 0
-        let spinning = false
-        const angle = 360 / segments
+            // Cấu hình các ô theo tỉ lệ % chuẩn (tổng 100%)
+            const segments = [
+                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#2ecc71' },  // 2 ô giống nhau, mỗi ô 10% => 2 ô = 20%
+                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#2ecc71' },  // ô thứ 2
+                { label: 'THÊM 2 LƯỢT', percent: 5, color: '#f1c40f' },   // 1 ô 5%
+                { label: 'MẤT 1 LƯỢT', percent: 20, color: '#e74c3c' },   // 1 ô 20%
+                { label: 'KHÔNG CÓ GÌ', percent: 16.6667, color: '#7f8c8d' }, // 3 ô mỗi ô ~16.666%
+                { label: 'KHÔNG CÓ GÌ', percent: 16.6667, color: '#7f8c8d' },
+                { label: 'KHÔNG CÓ GÌ', percent: 16.6667, color: '#7f8c8d' }
+            ];
 
-        function drawWheel() {
-            ctx.clearRect(0, 0, 420, 420)
-            ctx.save()
-            ctx.translate(210, 210)
-            ctx.rotate(rotation * Math.PI / 180)
-            
-            for (let i = 0; i < segments; i++) {
-                ctx.beginPath()
-                ctx.arc(0, 0, 200, i * angle * Math.PI / 180, (i + 1) * angle * Math.PI / 180)
-                ctx.lineTo(0, 0)
-                ctx.fillStyle = colors[i]
-                ctx.fill()
-                ctx.strokeStyle = "#111"
-                ctx.lineWidth = 8
-                ctx.stroke()
-                
-                // Text
-                ctx.save()
-                ctx.rotate((i * angle + angle / 2) * Math.PI / 180)
-                ctx.textAlign = "center"
-                ctx.fillStyle = "#000"
-                ctx.font = "bold 22px 'Press Start 2P'"
-                ctx.shadowColor = "#fff"
-                ctx.shadowBlur = 10
-                ctx.fillText(prizes[i], 0, -85)
-                ctx.restore()
-            }
-            
-            ctx.restore()
-            
-            // Center dot
-            ctx.beginPath()
-            ctx.arc(210, 210, 35, 0, Math.PI * 2)
-            ctx.fillStyle = "#111"
-            ctx.fill()
-            ctx.strokeStyle = "#ffff00"
-            ctx.lineWidth = 12
-            ctx.stroke()
-        }
+            // tính tổng góc = 2*PI
+            const totalPercent = segments.reduce((acc, s) => acc + s.percent, 0);
+            // nếu có sai số làm tròn thì điều chỉnh ô cuối (nhưng 100% ổn)
+            const angles = [];
+            let cumAngle = 0;
+            segments.forEach(seg => {
+                const angle = (seg.percent / 100) * Math.PI * 2;
+                angles.push({ start: cumAngle, end: cumAngle + angle, label: seg.label, color: seg.color, percent: seg.percent });
+                cumAngle += angle;
+            });
 
-        function spin() {
-            if (spinning) return
-            spinning = true
-            document.getElementById('spinBtn').disabled = true
-            
-            const extraSpins = 8 + Math.random() * 6
-            const randomAngle = Math.random() * 360
-            const target = rotation + extraSpins * 360 + randomAngle
-            
-            const start = Date.now()
-            const duration = 4500
-            
-            function animate() {
-                const elapsed = Date.now() - start
-                let progress = Math.min(elapsed / duration, 1)
-                progress = 1 - Math.pow(1 - progress, 4) // ease out
-                
-                rotation = rotation + (target - rotation) * progress
-                drawWheel()
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animate)
-                } else {
-                    rotation = target % 360
-                    drawWheel()
-                    
-                    // Xác định phần thắng
-                    const finalAngle = (360 - (rotation % 360)) % 360
-                    const winnerIndex = Math.floor(finalAngle / angle) % segments
-                    const prize = prizes[winnerIndex]
-                    
-                    setTimeout(() => {
-                        alert(`🎉 BẠN NHẬN ĐƯỢC: ${prize} 🎉`)
-                        spinning = false
-                        document.getElementById('spinBtn').disabled = false
-                    }, 300)
+            // vẽ bánh xe với góc xoay hiện tại (rad)
+            let currentRotation = 0; // radian
+            function drawWheel(rotation) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = canvas.width * 0.42; // nhỉnh hơn một chút
+
+                for (let i = 0; i < angles.length; i++) {
+                    const seg = angles[i];
+                    const start = seg.start + rotation;
+                    const end = seg.end + rotation;
+
+                    // vẽ múi
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, start, end);
+                    ctx.closePath();
+                    ctx.fillStyle = seg.color;
+                    ctx.fill();
+                    ctx.strokeStyle = '#222';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // vẽ nhãn (ở giữa múi)
+                    const midAngle = (start + end) / 2;
+                    const labelRadius = radius * 0.7; // đưa chữ vào trong
+                    const x = centerX + Math.cos(midAngle) * labelRadius;
+                    const y = centerY + Math.sin(midAngle) * labelRadius;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(midAngle + (midAngle > Math.PI/2 ? Math.PI : 0)); // xoay chữ cho dễ đọc
+                    ctx.font = 'bold 16px "Inter", sans-serif';
+                    ctx.fillStyle = '#fff';
+                    ctx.shadowColor = 'black';
+                    ctx.shadowBlur = 8;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    let shortLabel = seg.label.substring(0, 8);
+                    if (seg.label.includes('KHÔNG')) shortLabel = '🍃 0';
+                    else if (seg.label.includes('THÊM 1')) shortLabel = '+1✨';
+                    else if (seg.label.includes('THÊM 2')) shortLabel = '+2🔥';
+                    else if (seg.label.includes('MẤT')) shortLabel = '-1💔';
+                    ctx.fillText(shortLabel, 0, 0);
+                    ctx.restore();
                 }
-            }
-            animate()
-        }
 
-        // Vẽ lần đầu
-        drawWheel()
-        
-        // Responsive canvas
-        window.addEventListener('resize', () => {
-            if (window.innerWidth < 500) {
-                canvas.style.width = '300px'
-                canvas.style.height = '300px'
+                // vẽ tâm trang trí
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 18, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffd966';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'gold';
+                ctx.fill();
+                ctx.shadowBlur = 0;
             }
-        })
-    </script>
-</body>
-</html>
+
+            // animation spin
+            let spinning = false;
+            let spinVelocity = 0;
+            let requestId = null;
+            const baseSpeed = 0.8; // rad / frame lúc bắt đầu
+
+            // hàm chọn kết quả dựa trên xác suất, trả về index segment và góc dừng mong muốn
+            function getRandomSegmentIndex() {
+                const r = Math.random() * 100;
+                let cumulative = 0;
+                for (let i = 0; i < segments.length; i++) {
+                    cumulative += segments[i].percent;
+                    if (r < cumulative) return i;
+                }
+                return segments.length - 1; // an toàn
+            }
+
+            function spinWheel() {
+                if (spinning) return;
+                spinning = true;
+                spinBtn.style.opacity = '0.6';
+                spinBtn.disabled = true;
+
+                // chọn ngẫu nhiên ô trúng
+                const targetIndex = getRandomSegmentIndex();
+                const targetSegment = angles[targetIndex];
+                // góc giữa của ô (để pointer chỉ vào giữa ô)
+                const targetMid = (targetSegment.start + targetSegment.end) / 2;
+
+                // góc hiện tại: currentRotation (pointer ở góc 0? thực tế pointer ở trên đỉnh (12h) = -PI/2)
+                // pointer ở top = -PI/2. Ta muốn sau khi dừng, mid angle + rotation = -PI/2 (mod 2pi)
+                // => rotation cần = -PI/2 - targetMid + 2pi*k
+                const pointerAngle = -Math.PI / 2; // hướng lên trên
+                let targetRotation = pointerAngle - targetMid;
+
+                // chuẩn hóa targetRotation về khoảng [0, 2pi]
+                targetRotation = ((targetRotation % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+
+                // thêm vài vòng quay (từ 5 đến 10 vòng)
+                const extraTurns = 8 + Math.floor(Math.random() * 6); // 8-13 vòng
+                const targetAngle = targetRotation + extraTurns * 2 * Math.PI;
+
+                const startRotation = currentRotation;
+                const delta = targetAngle - startRotation;
+                const duration = 3000; // 3 giây
+                const startTime = performance.now();
+
+                // animate
+                function animateSpin(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // easing out cubic
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    currentRotation = startRotation + delta * easeOut;
+
+                    drawWheel(currentRotation);
+
+                    if (progress < 1) {
+                        requestId = requestAnimationFrame(animateSpin);
+                    } else {
+                        // kết thúc
+                        spinning = false;
+                        spinBtn.style.opacity = '1';
+                        spinBtn.disabled = false;
+                        requestId = null;
+
+                        // hiển thị kết quả
+                        const selected = segments[targetIndex];
+                        let viText = '';
+                        if (selected.label.includes('THÊM 1')) viText = '🎉 Bạn được THÊM 1 lượt chơi!';
+                        else if (selected.label.includes('THÊM 2')) viText = '🔥 TUYỆT! THÊM 2 LƯỢT!';
+                        else if (selected.label.includes('MẤT 1')) viText = '😨 Rất tiếc... MẤT 1 lượt.';
+                        else viText = '🍃 Không có gì, quay lại nhé!';
+                        resultDiv.innerHTML = viText;
+                    }
+                }
+
+                requestId = requestAnimationFrame(animateSpin);
+            }
+
+            spinBtn.addEventListener('click', spinWheel);
+            // vẽ lần đầu
+            drawWheel(currentRotation);
+            resultDiv.innerHTML = '✨ quay thử vận may ✨';
+
+            // responsive: vẽ lại khi thay đổi kích thước (canvas đã fixed size, nhưng vẫn cần nếu resize)
+            window.addEventListener('resize', () => drawWheel(currentRotation));
+
+            // ------------------------ NHẠC NỀN -----------------------------
+            const audio = document.getElementById('bgMusic');
+            const musicToggle = document.getElementById('musicToggle');
+            const musicIcon = document.getElementById('musicIcon');
+
+            let musicPlaying = false;
+
+            // Hầu hết trình duyệt chặn autoplay có âm thanh -> cần tương tác trước
+            // Mặc định hiển thị nút play, khi bấm lần đầu sẽ phát
+            musicToggle.addEventListener('click', () => {
+                if (musicPlaying) {
+                    audio.pause();
+                    musicIcon.className = 'fa-solid fa-music'; // không gạch chéo
+                    musicToggle.classList.add('muted');
+                } else {
+                    audio.play()
+                        .then(() => {
+                            musicIcon.className = 'fa-solid fa-volume-high';
+                            musicToggle.classList.remove('muted');
+                        })
+                        .catch(e => {
+                            alert('Hãy chạm thêm lần nữa để phát nhạc (trình duyệt cần tương tác)');
+             
