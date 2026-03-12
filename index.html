@@ -146,18 +146,24 @@
             transition: 0.25s;
         }
         .game-icon {
-            font-size: 3.5rem;
             min-width: 80px;
-            text-align: center;
-            filter: drop-shadow(0 0 10px cyan);
-            background: #15202b;
             width: 80px;
             height: 80px;
             border-radius: 50%;
+            background: #15202b;
+            border: 2px solid #ffcc66;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #ffcc66;
+            gap: 6px;
+            flex-wrap: wrap;
+            font-size: 2.2rem; /* giảm để hai icon vừa khung */
+            color: white;
+            filter: drop-shadow(0 0 10px cyan);
+            padding: 5px;
+        }
+        .game-icon i {
+            filter: drop-shadow(0 0 4px gold);
         }
         .game-info h3 {
             font-size: 1.7rem;
@@ -224,29 +230,37 @@
             <div class="result-msg" id="wheelResult">🔥 Chờ bạn quay 🔥</div>
         </div>
 
-        <!-- 3 GAME -->
+        <!-- 3 GAME với tên và icon đã chỉnh sửa -->
         <div class="games-list">
-            <!-- Ném phi tiêu vào bong bóng -->
+            <!-- BONG BÓNG (ném phi tiêu vào bong bóng) -->
             <div class="game-item">
-                <div class="game-icon"><i class="fa-regular fa-circle-dot"></i><i class="fa-solid fa-dharmachakra"></i></div>
+                <div class="game-icon">
+                    <i class="fa-regular fa-circle"></i>
+                    <i class="fa-solid fa-dharmachakra"></i>
+                </div>
                 <div class="game-info">
-                    <h3>BONG BÓNG & PHI TIÊU</h3>
-                    <p><i class="fa-solid fa-bullseye"></i> Ném vỡ bong bóng lơ lửng</p>
+                    <h3>BONG BÓNG</h3>
+                    <p><i class="fa-solid fa-bullseye"></i> Ném phi tiêu vỡ bong bóng</p>
                 </div>
             </div>
-            <!-- Ném phi tiêu vào bia -->
+            <!-- PHI TIÊU (ném phi tiêu vào bia) -->
             <div class="game-item">
-                <div class="game-icon"><i class="fa-solid fa-crosshairs"></i></div>
+                <div class="game-icon">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </div>
                 <div class="game-info">
-                    <h3>BIA ĐIỂM CAO</h3>
+                    <h3>PHI TIÊU</h3>
                     <p><i class="fa-solid fa-dart"></i> Phi tiêu hồng tâm tính điểm</p>
                 </div>
             </div>
-            <!-- Ném lon -->
+            <!-- NÉM LON -->
             <div class="game-item">
-                <div class="game-icon"><i class="fa-solid fa-beer-can"></i><i class="fa-solid fa-bolt"></i></div>
+                <div class="game-icon">
+                    <i class="fa-solid fa-beer-can"></i>
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
                 <div class="game-info">
-                    <h3>ĐỔ CHỒNG LON</h3>
+                    <h3>NÉM LON</h3>
                     <p><i class="fa-solid fa-cubes"></i> Bóng trúng lon, đổ hết</p>
                 </div>
             </div>
@@ -265,29 +279,36 @@
     <!-- file nhạc nền (cần upload cùng thư mục) -->
     <audio id="bgMusic" loop preload="auto">
         <source src="background-music.mp3" type="audio/mpeg">
-        <!-- trình duyệt sẽ bỏ qua nếu không có file -->
     </audio>
 
     <script>
         (function() {
             // ------------------------------------------------------------
-            // VÒNG QUAY CHUẨN XÁC VỚI TỶ LỆ BẠN YÊU CẦU
-            // 2 ô "Thêm 1 lượt" : 20% (mỗi ô 10%)
-            // 1 ô "Thêm 2 lượt" : 5%
-            // 1 ô "Mất 1 lượt"   : 20%
-            // 3 ô "Không có gì"  : 50% (mỗi ô 16.6666667%)
+            // VÒNG QUAY VỚI CÁC Ô ĐƯỢC XẾP LỘN XỘN (SHUFFLE)
+            // Tỷ lệ giữ nguyên: 2 ô "Thêm 1 lượt" (20%), 1 ô "Thêm 2 lượt" (5%),
+            // 1 ô "Mất 1 lượt" (20%), 3 ô "Không có gì" (50%)
             // ------------------------------------------------------------
-            const segments = [
-                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#2ecc71' },   // ô 1/2 của 20%
-                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#27ae60' },   // ô 2/2
-                { label: 'THÊM 2 LƯỢT', percent: 5, color: '#f39c12' },    // 1 ô 5%
-                { label: 'MẤT 1 LƯỢT', percent: 20, color: '#e67e22' },    // 1 ô 20%
-                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#7f8c8d' }, // 3 ô giống nhau
+            let segments = [
+                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#2ecc71' },
+                { label: 'THÊM 1 LƯỢT', percent: 10, color: '#27ae60' },
+                { label: 'THÊM 2 LƯỢT', percent: 5, color: '#f39c12' },
+                { label: 'MẤT 1 LƯỢT', percent: 20, color: '#e67e22' },
+                { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#7f8c8d' },
                 { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#95a5a6' },
                 { label: 'KHÔNG CÓ GÌ', percent: 50/3, color: '#bdc3c7' }
             ];
 
-            // tính toán góc cho mỗi segment
+            // Xáo trộn thứ tự các ô (lộn xộn)
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+            segments = shuffleArray(segments);
+
+            // tính toán góc cho mỗi segment dựa trên thứ tự đã xáo
             const angles = [];
             let start = 0;
             segments.forEach(seg => {
@@ -367,27 +388,20 @@
 
             // lấy segment index dựa trên góc của pointer (pointer ở -PI/2)
             function getSegmentFromRotation(rot) {
-                // góc pointer cố định = -PI/2 (trên đỉnh)
                 const pointerAngle = -Math.PI / 2;
-                // góc thực tế của điểm múi tại pointer: (góc segment + rot) % 2pi
-                // ta muốn tìm segment mà pointerAngle nằm trong khoảng [start+rot , end+rot] (tính mod 2pi)
-                let angleOnWheel = pointerAngle; // vì pointerAngle không đổi, nhưng cần tìm segment
-                // đưa angleOnWheel về [0, 2pi]
-                let raw = (angleOnWheel) % (2*Math.PI);
+                let raw = (pointerAngle) % (2*Math.PI);
                 if (raw < 0) raw += 2*Math.PI;
 
                 for (let i = 0; i < angles.length; i++) {
                     let s = (angles[i].start + rot) % (2*Math.PI);
                     let e = (angles[i].end + rot) % (2*Math.PI);
-                    // xử lý wrap-around
                     if (s < e) {
                         if (raw >= s && raw < e) return i;
                     } else {
-                        // đoạn qua 0
                         if (raw >= s || raw < e) return i;
                     }
                 }
-                return 0; // fallback
+                return 0;
             }
 
             // quay
@@ -396,7 +410,7 @@
                 spinning = true;
                 spinBtn.disabled = true;
 
-                // random target theo đúng tỉ lệ
+                // random target theo đúng tỉ lệ (dựa trên segments đã shuffle)
                 const r = Math.random() * 100;
                 let cum = 0;
                 let targetIdx = 0;
@@ -408,30 +422,24 @@
                     }
                 }
 
-                // góc đích: pointer nên nằm giữa segment targetIdx
                 const targetSeg = angles[targetIdx];
-                const targetMid = (targetSeg.start + targetSeg.end) / 2; // rad trong khoảng [0, 2pi)
-                const pointerAngle = -Math.PI / 2; // trên đỉnh
+                const targetMid = (targetSeg.start + targetSeg.end) / 2;
+                const pointerAngle = -Math.PI / 2;
 
-                // góc cần xoay để targetMid + rotation = pointerAngle (mod 2pi)
-                // => rotation = pointerAngle - targetMid + k*2pi
                 let targetRotation = pointerAngle - targetMid;
-                // chuẩn hóa về [0, 2pi)
                 targetRotation = ((targetRotation % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
 
-                // thêm vài vòng quay
                 const extraTurns = 10 + Math.floor(Math.random() * 8); // 10-17 vòng
                 const finalRotation = targetRotation + extraTurns * 2 * Math.PI;
 
                 const startRotation = rotation;
                 const delta = finalRotation - startRotation;
-                const duration = 3200; // ms
+                const duration = 3200;
                 const startTime = performance.now();
 
                 function animate(now) {
                     const elapsed = now - startTime;
                     const p = Math.min(elapsed / duration, 1);
-                    // easing out cubic
                     const ease = 1 - Math.pow(1 - p, 3);
                     rotation = startRotation + delta * ease;
                     drawWheel(rotation);
@@ -439,7 +447,6 @@
                     if (p < 1) {
                         animFrame = requestAnimationFrame(animate);
                     } else {
-                        // dừng
                         spinning = false;
                         spinBtn.disabled = false;
                         animFrame = null;
@@ -467,41 +474,14 @@
             const musicIcon = document.getElementById('musicIcon');
             let musicPlaying = false;
 
-            // Hàm bật/tắt nhạc
-            function toggleMusic(forcePlay = false) {
-                if (musicPlaying || forcePlay) {
-                    audio.play()
-                        .then(() => {
-                            musicPlaying = true;
-                            musicIcon.className = 'fa-solid fa-volume-high';
-                            musicToggle.classList.remove('muted');
-                        })
-                        .catch(e => {
-                            // vẫn cần tương tác trực tiếp
-                            musicPlaying = false;
-                            musicIcon.className = 'fa-solid fa-music';
-                            musicToggle.classList.add('muted');
-                            if (!forcePlay) alert('Chạm lần nữa để phát nhạc (cần tương tác)');
-                        });
-                } else {
-                    audio.pause();
-                    musicPlaying = false;
-                    musicIcon.className = 'fa-solid fa-music';
-                    musicToggle.classList.add('muted');
-                }
-            }
-
-            // Khi bấm nút nhạc
             musicToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if (musicPlaying) {
-                    // đang phát -> tắt
                     musicPlaying = false;
                     audio.pause();
                     musicIcon.className = 'fa-solid fa-music';
                     musicToggle.classList.add('muted');
                 } else {
-                    // đang tắt -> bật (play)
                     audio.play()
                         .then(() => {
                             musicPlaying = true;
@@ -514,7 +494,6 @@
                 }
             });
 
-            // Tự động thử phát nhạc ngay khi người dùng bấm QUAY lần đầu (tương tác)
             spinBtn.addEventListener('click', function once() {
                 if (!musicPlaying) {
                     audio.play()
@@ -525,14 +504,12 @@
                         })
                         .catch(() => {});
                 }
-            }, { once: true }); // chỉ chạy lần đầu
+            }, { once: true });
 
-            // nếu lỗi audio (không có file) thì ẩn nút nhạc
             audio.addEventListener('error', () => {
                 musicToggle.style.display = 'none';
             });
 
-            // responsive: vẽ lại khi xoay màn hình
             window.addEventListener('resize', () => drawWheel(rotation));
         })();
     </script>
