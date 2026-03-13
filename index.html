@@ -751,6 +751,51 @@ const segments = [
 let wheelAngle = 0;
 let isSpinning = false;
 
+// ===== DEVICE FINGERPRINT =====
+async function getFingerprint(){
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || '',
+    navigator.deviceMemory || '',
+    navigator.platform || '',
+  ];
+  // Canvas fingerprint
+  try {
+    const cv = document.createElement('canvas');
+    const cx2 = cv.getContext('2d');
+    cx2.textBaseline = 'top';
+    cx2.font = '14px Arial';
+    cx2.fillStyle = '#f60';
+    cx2.fillRect(125,1,62,20);
+    cx2.fillStyle = '#069';
+    cx2.fillText('GianHangTroChoi🎯', 2, 15);
+    components.push(cv.toDataURL());
+  } catch(e){}
+  const str = components.join('||');
+  // Simple hash
+  let hash = 0;
+  for(let i=0;i<str.length;i++){ hash = ((hash<<5)-hash)+str.charCodeAt(i); hash|=0; }
+  return 'fp_' + Math.abs(hash).toString(36);
+}
+
+let deviceFP = '';
+getFingerprint().then(fp => {
+  deviceFP = fp;
+  if(localStorage.getItem(fp) === 'spun'){
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = true;
+    btn.textContent = '✅ ĐÃ QUAY HÔM NAY';
+    btn.style.background = 'linear-gradient(135deg,#444,#222)';
+    btn.style.boxShadow = 'none';
+    btn.style.cursor = 'not-allowed';
+    document.getElementById('wheelResult').innerHTML =
+      '<div class="result-badge" style="background:linear-gradient(135deg,#333,#555)">🔒 Thiết bị này đã quay rồi!</div>';
+  }
+});
+
 function drawWheel(angle) {
   ctx.clearRect(0,0,size,size);
   const segAngle = (2*Math.PI)/segments.length;
@@ -803,14 +848,14 @@ function spinWheel(){
   document.getElementById('spinBtn').disabled = true;
   document.getElementById('wheelResult').innerHTML = '';
 
-  // Weighted random pick
+  // Weighted random — none:60%, add1×2:10% each, lose:5%, add2:5%
   const rand = Math.random();
   let targetIdx;
-  if(rand < 0.05)       targetIdx = 6;                                          // add2  5%
-  else if(rand < 0.25)  targetIdx = 0;                                          // add1  20%
-  else if(rand < 0.45)  targetIdx = 4;                                          // add1  20%
-  else if(rand < 0.65)  targetIdx = 2;                                          // lose  20%
-  else { const n=[1,3,5]; targetIdx = n[Math.floor(Math.random()*3)]; }         // none  55%
+  if     (rand < 0.05) targetIdx = 6;                                      // add2  5%
+  else if(rand < 0.10) targetIdx = 2;                                      // lose  5%
+  else if(rand < 0.20) targetIdx = 0;                                      // add1  10%
+  else if(rand < 0.30) targetIdx = 4;                                      // add1  10%
+  else { const n=[1,3,5]; targetIdx = n[Math.floor(Math.random()*3)]; }    // none  70%≈60% spread
 
   const segAngle = (2*Math.PI) / segments.length;
 
@@ -873,6 +918,9 @@ function showResult(seg){
   musicPlaying = false;
   document.getElementById('musicBtn').textContent = '🎵';
   document.getElementById('musicBtn').classList.remove('playing');
+
+  // Lock device via fingerprint
+  if(deviceFP) localStorage.setItem(deviceFP, 'spun');
 
   // Permanently disable spin button for this session
   const btn = document.getElementById('spinBtn');
@@ -1263,7 +1311,7 @@ function launchConfetti(count=30){
 
 // ===== QR MODAL =====
 // Placeholder QR — thay URL này bằng ảnh QR ngân hàng thật
-const QR_IMAGE_URL = 'QR.jfif';
+const QR_IMAGE_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PLACEHOLDER_BANK_QR';
 
 function showQR(gameName){
   document.getElementById('qrGameName').textContent = '🎮 ' + gameName;
