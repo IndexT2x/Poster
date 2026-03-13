@@ -1,1 +1,2 @@
-Đọc gì, đây la dự án cá nhân xàm cuc nhất cái VNG này đấy
+Đây là dự án xàm cức nhất cái VNG này.
+Đơn giản là web chạy trên github thôi, tao cá là cái VNG mấy thằng biết sử dụng github haha
